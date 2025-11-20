@@ -1,0 +1,8 @@
+Flask
+Flask-SQLAlchemy
+Werkzeug
+python-dotenv
+itsdangerous
+pandas
+openpyxl
+pymongo

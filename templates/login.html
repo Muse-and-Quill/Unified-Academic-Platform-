@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Unified Academic Platform - Login</title>
+
+<!-- GOOGLE FONTS -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Poppins", sans-serif;
+    }
+
+    body {
+        overflow-x: hidden;
+    }
+
+    /* ================= PRELOADER ================= */
+    #preloader {
+        position: fixed;
+        inset: 0;
+        background: linear-gradient(to bottom right, #FCF5EE, #EBD5AB);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+
+    #preloader img {
+        width: 120px;
+        height: 120px;
+        animation: pulse 1.5s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); opacity: 1; }
+        50% { transform: scale(1.1); opacity: 0.7; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* ================= BACKGROUND ================= */
+    .bg-image {
+        position: absolute;
+        inset: 0;
+        background-image: url("https://plus.unsplash.com/premium_photo-1676068243733-df1880c2aef8?auto=format&fit=crop");
+        background-size: cover;
+        background-position: center;
+        filter: blur(3px);
+        opacity: 0.8;
+        z-index: -2;
+    }
+
+    .bg-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to bottom right, rgba(248,244,236,0.6), rgba(255,162,57,0.3));
+        z-index: -1;
+    }
+
+    /* ================= NAVBAR MAIN ================= */
+    .navbar {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        padding-top: 20px;
+        position: relative;
+        z-index: 999;
+    }
+
+    .nav-container {
+        width: 100%;
+        max-width: 1100px;
+        height: 70px;
+        padding: 8px 25px;
+
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        border-radius: 50px;
+
+        backdrop-filter: blur(15px);
+        background: rgba(255, 255, 255, 0.22);
+        border: 1px solid rgba(255, 255, 255, 0.35);
+
+        box-shadow: 0px 8px 25px rgba(0,0,0,0.15);
+
+        opacity: 0;
+        transform: translateY(-40px);
+        animation: navFade 0.6s ease-out forwards;
+    }
+
+    @keyframes navFade {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .logo {
+        width: 150px;
+        transition: 0.3s;
+    }
+
+    .logo:hover {
+        transform: scale(1.05);
+    }
+
+    .menu {
+        display: flex;
+        align-items: center;
+        gap: 30px;
+        font-weight: 600;
+    }
+
+    .menu a {
+        text-decoration: none;
+        color: #63A361;
+        font-size: 18px;
+        transition: 0.3s;
+    }
+
+    .menu a:hover {
+        color: #427A76;
+    }
+
+    .btn-primary {
+        padding: 10px 32px;
+        background: #FFA239;
+        color: white;
+        border: none;
+        border-radius: 40px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0px 5px 15px rgba(0,0,0,0.2);
+        transition: 0.3s;
+    }
+
+    .btn-primary:hover {
+        background: #ff9933;
+        transform: scale(1.05);
+    }
+
+    /* ================= MOBILE MENU BUTTON ================= */
+    .menu-btn {
+        display: none;
+        font-size: 32px;
+        color: #F8F4EC;
+        cursor: pointer;
+    }
+
+    .mobile-menu {
+        position: absolute;
+        top: 110px;
+        width: 100%;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 25px;
+
+        background: rgba(255,255,255,0.28);
+        backdrop-filter: blur(15px);
+        border-radius: 25px;
+        border: 1px solid rgba(255,255,255,0.4);
+        box-shadow: 0px 5px 25px rgba(0, 0, 0, 0.15);
+
+        display: none;
+        flex-direction: column;
+        text-align: center;
+        gap: 18px;
+
+        animation: dropdown 0.35s ease-out;
+    }
+
+    @keyframes dropdown {
+        from { opacity: 0; transform: translateY(-15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .mobile-menu a {
+        text-decoration: none;
+        color: #403A3E;
+        font-size: 20px;
+        font-weight: 600;
+    }
+
+    .mobile-btn {
+        margin-top: 10px;
+    }
+
+    /* ================= RESPONSIVE NAV ================= */
+    @media (max-width: 768px) {
+        .menu {
+            display: none;
+        }
+        .menu-btn {
+            display: block;
+        }
+    }
+
+    /* ================= MAIN CONTENT (LOGIN) ================= */
+    main {
+        min-height: 80vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .login-wrapper {
+        width: 100%;
+        max-width: 950px;
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 30px;
+
+        background: rgba(255, 255, 255, 0.26);
+        border-radius: 30px;
+        border: 1px solid rgba(255,255,255,0.4);
+        backdrop-filter: blur(12px);
+        box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.15);
+
+        padding: 35px;
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeIn 1.2s ease-out forwards 0.3s;
+    }
+
+    .login-info {
+        padding-right: 10px;
+        border-right: 1px solid rgba(255,255,255,0.7);
+    }
+
+    .login-info h1 {
+        font-size: 34px;
+        color: #540863;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .login-info p {
+        font-size: 16px;
+        color: #444;
+        margin-bottom: 12px;
+    }
+
+    .login-info ul {
+        margin-top: 10px;
+        margin-left: 18px;
+        text-align: left;
+        color: #444;
+        font-size: 14px;
+    }
+
+    .login-info li {
+        margin-bottom: 5px;
+    }
+
+    .tag-pill {
+        display: inline-block;
+        padding: 4px 10px;
+        border-radius: 20px;
+        background: rgba(255,162,57,0.16);
+        color: #8a4c15;
+        font-size: 12px;
+        font-weight: 600;
+        margin-top: 8px;
+    }
+
+    .login-card {
+        padding-left: 10px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .login-card h2 {
+        font-size: 24px;
+        margin-bottom: 15px;
+        color: #333;
+        text-align: left;
+    }
+
+    form {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+        text-align: left;
+        margin-bottom: 3px;
+    }
+
+    .input-group {
+        text-align: left;
+        display: flex;
+        flex-direction: column;
+    }
+
+    input, select {
+        padding: 10px 12px;
+        border-radius: 12px;
+        border: 1px solid rgba(0,0,0,0.1);
+        outline: none;
+        font-size: 14px;
+        background: rgba(255,255,255,0.9);
+        transition: 0.2s;
+    }
+
+    input:focus, select:focus {
+        border-color: #FFA239;
+        box-shadow: 0 0 0 2px rgba(255,162,57,0.25);
+    }
+
+    .btn-submit {
+        margin-top: 5px;
+        padding: 11px 20px;
+        font-size: 16px;
+        background: #FFA239;
+        color: #fff;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: 0.3s;
+        box-shadow: 0px 5px 15px rgba(0,0,0,0.18);
+    }
+
+    .btn-submit:hover {
+        background: #ff9933;
+        transform: translateY(-1px);
+    }
+
+    .helper-text {
+        margin-top: 8px;
+        font-size: 13px;
+        color: #555;
+        text-align: left;
+    }
+
+    .helper-text a {
+        color: #427A76;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .helper-text a:hover {
+        text-decoration: underline;
+    }
+
+    /* ================= RESPONSIVE LAYOUT ================= */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 900px) {
+        .login-wrapper {
+            grid-template-columns: 1fr;
+            padding: 25px 20px;
+        }
+        .login-info {
+            border-right: none;
+            border-bottom: 1px solid rgba(255,255,255,0.7);
+            padding-bottom: 15px;
+            margin-bottom: 10px;
+        }
+        .login-card {
+            padding-left: 0;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .login-info h1 {
+            font-size: 26px;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<!-- ================= PRELOADER ================= -->
+<div id="preloader">
+    <img src="/DICT/static/images/preloader.gif" alt="Loading...">
+</div>
+
+<div class="bg-image"></div>
+<div class="bg-overlay"></div>
+
+<!-- ================= NAVBAR ================= -->
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="/">
+            <img src="uap-logo.png" alt="UAP Logo" class="logo">
+        </a>
+
+        <div class="menu">
+            <a href="/about">About</a>
+            <a href="/contact">Contact Us</a>
+            <a href="/login">
+                <button class="btn-primary">Sign In / Register</button>
+            </a>
+        </div>
+
+        <div class="menu-btn" id="menuBtn">☰</div>
+    </div>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <a href="/about">About</a>
+        <a href="/contact">Contact Us</a>
+        <a href="/login">
+            <button class="btn-primary mobile-btn">Sign In / Register</button>
+        </a>
+    </div>
+</nav>
+
+<!-- ================= LOGIN CONTENT ================= -->
+<main>
+    <div class="login-wrapper">
+        <div class="login-info">
+            <h1>Welcome back to UAP</h1>
+            <p>Sign in to access the Unified Academic Platform and manage academic journeys with clarity and control.</p>
+            <p>Use the credentials sent to your registered email.</p>
+            <span class="tag-pill">DICT • Help & Support • Secure Access</span>
+
+            <ul>
+                <li>HSD / DICT Employees use <strong>Employee ID + Email + Password</strong>.</li>
+                <li>Students and Teachers will receive their credentials via email after upload.</li>
+                <li>For any issues, contact the Help & Support Department.</li>
+            </ul>
+        </div>
+
+        <div class="login-card">
+            <h2>Sign In</h2>
+            
+
+{% if error %}
+<p style="color:#c0392b; font-size:13px; margin-bottom:10px; text-align:left;">
+    {{ error }}
+</p>
+{% endif %}
+            <form method="POST" action="/login">
+                <!-- ROLE SELECTION (future-proof for Student / Teacher) -->
+                <div class="input-group">
+                    <label for="role">Login As</label>
+                    <select name="role" id="role" required>
+                        <option value="hsd" selected>HSD / DICT Employee</option>
+                        <option value="student">Student</option>
+                        <option value="teacher">Teacher</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label for="employee_id">Employee ID</label>
+                    <input 
+                        type="text" 
+                        id="employee_id" 
+                        name="employee_id" 
+                        placeholder="e.g. DICT001"
+                        required
+                    />
+                </div>
+
+                <div class="input-group">
+                    <label for="email">Registered Email</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        placeholder="your.email@example.com"
+                        required
+                    />
+                </div>
+
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        placeholder="Enter your password"
+                        required
+                    />
+                </div>
+
+                <button type="submit" class="btn-submit">Login</button>
+
+                <p class="helper-text">
+                    Forgot your password? 
+                    <a href="/forgot-password">Reset here</a>
+                </p>
+            </form>
+        </div>
+    </div>
+</main>
+
+<!-- ================= JS FOR PRELOADER & MENU ================= -->
+<script>
+    window.addEventListener("load", () => {
+        setTimeout(() => {
+            document.getElementById("preloader").style.display = "none";
+        }, 4000);
+    });
+
+    const menuBtn = document.getElementById("menuBtn");
+    const mobileMenu = document.getElementById("mobileMenu");
+
+    let open = false;
+
+    menuBtn.addEventListener("click", () => {
+        open = !open;
+        menuBtn.textContent = open ? "✖" : "☰";
+        mobileMenu.style.display = open ? "flex" : "none";
+    });
+</script>
+
+</body>
+</html>
