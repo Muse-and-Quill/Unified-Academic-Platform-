@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Edit Teacher – DICT</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+<script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+
+</head>
+<body>
+
+<div class="container">
+    <a href="{{ url_for('auth_bp.dict_teachers') }}" class="back-link">← Back to Teachers</a>
+    <h1>Edit Teacher</h1>
+
+    <p style="font-size:13px; color:#555; margin-bottom:5px;">
+        Registration No: <strong>{{ teacher.registration_number }}</strong>
+    </p>
+
+    <form method="POST">
+        <div>
+            <label>Name</label>
+            <input type="text" name="name" value="{{ teacher.name }}" required>
+        </div>
+
+        <div class="row">
+            <div>
+                <label>Email</label>
+                <input type="email" name="email" value="{{ teacher.email }}" required>
+            </div>
+            <div>
+                <label>Phone</label>
+                <input type="text" name="phone" value="{{ teacher.phone or '' }}">
+            </div>
+        </div>
+
+        <div class="row">
+            <div>
+                <label>Department</label>
+                <input type="text" name="department" value="{{ teacher.department or '' }}">
+            </div>
+            <div>
+                <label>Designation</label>
+                <input type="text" name="designation" value="{{ teacher.designation or '' }}">
+            </div>
+        </div>
+
+        <div class="row">
+            <div>
+                <label>Session Start Year</label>
+                <input type="number" name="session_start_year" value="{{ teacher.session_start_year or '' }}">
+            </div>
+            <div>
+                <label>Session End Year</label>
+                <input type="number" name="session_end_year" value="{{ teacher.session_end_year or '' }}">
+            </div>
+        </div>
+
+        <button type="submit" class="btn-save">Save Changes</button>
+    </form>
+</div>
+
+</body>
+</html>

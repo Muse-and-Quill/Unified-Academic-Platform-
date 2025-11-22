@@ -145,3 +145,34 @@ def _send_email(subject: str, body: str, to_email: str) -> bool:
     except Exception as e:
         print("Error sending email:", e)
         return False
+
+
+def send_staff_credentials_email(
+    to_email: str,
+    employee_number: str,
+    plain_password: str,
+    name: str,
+    role: str
+) -> bool:
+    """
+    Sends initial credentials email to non-teaching staff employees
+    (Library, Canteen, Examination, Accounts, Information, etc.).
+    """
+    subject = "Your Unified Academic Platform (UAP) Employee Credentials"
+    body = f"""
+Dear {name},
+
+Your Unified Academic Platform (UAP) employee account has been created.
+
+Employee Number : {employee_number}
+Role            : {role}
+Email           : {to_email}
+Password        : {plain_password}
+
+You can now log in to your respective dashboard using these credentials.
+Please change your password after your first login.
+
+Regards,
+Unified Academic Platform (UAP)
+"""
+    return _send_email(subject, body, to_email)

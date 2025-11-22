@@ -1,6 +1,9 @@
 import os
 
 class Config:
+    PROFILE_UPLOAD_FOLDER = "static/uploads/profiles"
+    MAX_CONTENT_LENGTH = 2 * 1024 * 1024 
+    ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
     # ========================
     # FLASK / APP SETTINGS
     # ========================
@@ -18,7 +21,7 @@ class Config:
     # ========================
     MONGODB_URI = os.getenv(
         "MONGODB_URI",
-        "mongodb://localhost:27017/uap_db"
+        "mongodb+srv://infounifiedacademics_db_user:sachinpokemon@uap.vpd12hn.mongodb.net/?appName=UAP"
     )
     MONGODB_DB_NAME = os.getenv("MONGODB_DB_NAME", "uap_db")
 

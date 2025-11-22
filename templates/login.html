@@ -391,7 +391,7 @@
 
 <!-- ================= PRELOADER ================= -->
 <div id="preloader">
-    <img src="/DICT/static/images/preloader.gif" alt="Loading...">
+    <img src="{{ url_for('static', filename='images/preloader.gif') }}" alt="Loading...">
 </div>
 
 <div class="bg-image"></div>
@@ -401,14 +401,15 @@
 <nav class="navbar">
     <div class="nav-container">
         <a href="/">
-            <img src="uap-logo.png" alt="UAP Logo" class="logo">
+            <img src="{{ url_for('static', filename='images/uap-logo.png') }}" alt="UAP Logo" class="logo">
         </a>
 
         <div class="menu">
+            <a href="/">Home</a>
             <a href="/about">About</a>
             <a href="/contact">Contact Us</a>
             <a href="/login">
-                <button class="btn-primary">Sign In / Register</button>
+                <button class="btn-primary">Sign In</button>
             </a>
         </div>
 
@@ -416,10 +417,11 @@
     </div>
 
     <div class="mobile-menu" id="mobileMenu">
+        <a href="/">Home</a>
         <a href="/about">About</a>
         <a href="/contact">Contact Us</a>
         <a href="/login">
-            <button class="btn-primary mobile-btn">Sign In / Register</button>
+            <button class="btn-primary mobile-btn">Sign In</button>
         </a>
     </div>
 </nav>
@@ -436,7 +438,7 @@
             <ul>
                 <li>HSD / DICT Employees use <strong>Employee ID + Email + Password</strong>.</li>
                 <li>Students and Teachers will receive their credentials via email after upload.</li>
-                <li>For any issues, contact the Help & Support Department.</li>
+                <li>For any issues, contact the DICT Department.</li>
             </ul>
         </div>
 
@@ -450,13 +452,12 @@
 </p>
 {% endif %}
             <form method="POST" action="/login">
-                <!-- ROLE SELECTION (future-proof for Student / Teacher) -->
+                
                 <div class="input-group">
                     <label for="role">Login As</label>
                     <select name="role" id="role" required>
-                        <option value="hsd" selected>HSD / DICT Employee</option>
-                        <option value="student">Student</option>
-                        <option value="teacher">Teacher</option>
+                        <option value="hsd" selected>DICT Employee</option>
+
                     </select>
                 </div>
 
@@ -466,7 +467,7 @@
                         type="text" 
                         id="employee_id" 
                         name="employee_id" 
-                        placeholder="e.g. DICT001"
+                        placeholder="e.g. DIC---"
                         required
                     />
                 </div>
@@ -477,7 +478,7 @@
                         type="email" 
                         id="email" 
                         name="email" 
-                        placeholder="your.email@example.com"
+                        placeholder="your.email@gmail.com"
                         required
                     />
                 </div>

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Unified Academic Platform - Landing</title>
+<title>Unified Academic Platform</title>
 
 <!-- GOOGLE FONTS -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -269,14 +269,15 @@
     <div class="nav-container">
         
         <a href="/">
-            <img src="uap-logo.png" alt="UAP Logo" class="logo">
+            <img src="{{ url_for('static', filename='images/uap-logo.png') }}" alt="UAP Logo" class="logo">
         </a>
 
         <div class="menu">
+            <a href="/">Home</a>
             <a href="/about">About</a>
             <a href="/contact">Contact Us</a>
             <a href="/login">
-                <button class="btn-primary">Sign In / Register</button>
+                <button class="btn-primary">Sign In</button>
             </a>
         </div>
 
@@ -285,10 +286,11 @@
     </div>
 
     <div class="mobile-menu" id="mobileMenu">
+        <a href="/">Home</a>
         <a href="/about">About</a>
         <a href="/contact">Contact Us</a>
         <a href="/login">
-            <button class="btn-primary mobile-btn">Sign In / Register</button>
+            <button class="btn-primary mobile-btn">Sign In </button>
         </a>
     </div>
 

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact Us Requests – DICT</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+</head>
+<body>
+  <div class="bg-image"></div>
+  <div class="bg-overlay"></div>
+
+<div class="container">
+    <a href="{{ url_for('auth_bp.dict_dashboard') }}" class="back-link">← Back to DICT Dashboard</a>
+
+    <h1>Contact Us Requests</h1>
+    <div class="subtitle">All messages submitted through the public Contact Us form.</div>
+
+    <!-- Flash messages (if you ever add actions later) -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="summary">
+        Total requests: <strong>{{ total }}</strong>
+        {% if total_pages > 1 %}
+          • Page {{ page }} of {{ total_pages }}
+        {% endif %}
+    </div>
+
+    {% if requests_list %}
+    <table>
+        <thead>
+            <tr>
+                <th>From</th>
+                <th>Subject & Message</th>
+                <th>Status</th>
+                <th>Received At</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in requests_list %}
+            <tr>
+                <td>
+                    <strong>{{ r.name }}</strong><br>
+                    <span class="small-text">{{ r.email }}</span>
+                </td>
+                <td class="msg-cell">
+                    {% if r.subject %}
+                      <strong>{{ r.subject }}</strong><br>
+                    {% endif %}
+                    {{ r.message }}
+                </td>
+                <td>
+                    {% set st = (r.status or 'new')|lower %}
+                    {% if st == 'new' %}
+                      <span class="status-badge status-new">New</span>
+                    {% elif st == 'seen' %}
+                      <span class="status-badge status-seen">Seen</span>
+                    {% else %}
+                      <span class="status-badge status-closed">{{ r.status|capitalize }}</span>
+                    {% endif %}
+                </td>
+                <td class="small-text">
+                    {% if r.created_at %}
+                      {{ r.created_at.strftime("%d-%m-%Y %H:%M") if r.created_at.__class__.__name__ == 'datetime' else r.created_at }}
+                    {% else %}
+                      -
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% else %}
+        <p>No contact requests found.</p>
+    {% endif %}
+
+    {% if total_pages > 1 %}
+    <div class="pagination">
+        {% if page > 1 %}
+            <a href="{{ url_for('auth_bp.dict_contact_requests', page=page-1) }}">Prev</a>
+        {% endif %}
+
+        {% for p in range(1, total_pages + 1) %}
+            {% if p == page %}
+                <span class="current">{{ p }}</span>
+            {% else %}
+                <a href="{{ url_for('auth_bp.dict_contact_requests', page=p) }}">{{ p }}</a>
+            {% endif %}
+        {% endfor %}
+
+        {% if page < total_pages %}
+            <a href="{{ url_for('auth_bp.dict_contact_requests', page=page+1) }}">Next</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+<script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+
+</body>
+</html>

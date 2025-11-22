@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DICT – Manage Employees</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+<script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+
+
+</head>
+<body>
+    <div class="bg-image"></div>
+<div class="bg-overlay"></div>
+<div class="container">
+    <a href="{{ url_for('auth_bp.dict_dashboard') }}" class="back-link">← Back to DICT Dashboard</a>
+    <h1>Manage Employees (Library / Canteen / Examination / Accounts / Information)</h1>
+<h2 style="margin-top:8px; font-size:16px;">Role-wise Employee Counts</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Role</th>
+            <th>Employees</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for r in role_counts %}
+        <tr>
+            <td>{{ r._id or 'Unknown' }}</td>
+            <td>{{ r.count }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+<div class="top-bar">
+
+    <!-- Search Bar -->
+    <form method="GET" class="search-form" style="flex:1;">
+
+        <div class="search-row">
+
+            <input type="text" id="staffSearch" name="q"
+                   placeholder="Search by Emp No, Name or Role"
+                   value="{{ search_query or '' }}">
+
+            <input type="date" name="from_date" value="{{ from_date or '' }}">
+            <input type="date" name="to_date" value="{{ to_date or '' }}">
+
+            <!-- Search button -->
+            <button type="submit" class="btn-primary">Search</button>
+
+            <!-- Download button next to search -->
+            <a href="{{ url_for('auth_bp.export_staff_filtered_csv',
+                                q=search_query or '',
+                                from_date=from_date or '',
+                                to_date=to_date or '') }}"
+               class="btn-upload">
+                Download CSV
+            </a>
+
+        </div>
+
+    </form>
+
+    <!-- Add Employee Button -->
+    <a href="{{ url_for('auth_bp.add_staff') }}" class="btn-primary" style="text-decoration:none;">
+        Add Employee
+    </a>
+
+</div>
+
+
+    <div class="upload-box">
+        <strong>Bulk Upload Employees (CSV / Excel)</strong>
+        <p>Required columns: <code>name</code>, <code>email</code>, <code>role</code>. Optional: <code>contact_number</code>, <code>dob</code>, <code>years_of_experience</code>, <code>date_of_joining</code>, <code>aadhaar_number</code>, <code>pan_number</code>.</p>
+        <form method="POST" action="{{ url_for('auth_bp.upload_staff') }}" enctype="multipart/form-data">
+            <input type="file" name="staff_file" accept=".csv,.xlsx,.xls" required>
+            <button type="submit" class="btn-primary">Upload</button>
+        </form>
+    </div>
+
+    {% if staff_list %}
+<div class="table-scroll">
+    <table>
+        <thead>
+            <tr>
+                <th>Emp No</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Contact</th>
+                <th>Role</th>
+                <th>Experience (yrs)</th>
+                <th>DOJ</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody id="staffTableBody">
+            {% for s in staff_list %}
+            <tr>
+                <td>{{ s.employee_number }}</td>
+                <td>{{ s.name }}</td>
+                <td>{{ s.email }}</td>
+                <td>{{ s.contact_number or '-' }}</td>
+                <td>{{ s.role }}</td>
+                <td>{{ s.years_of_experience or 0 }}</td>
+                <td>{{ s.date_of_joining or '-' }}</td>
+
+                <td>
+                    <div style="display:flex; gap:5px;">
+                        <a href="{{ url_for('auth_bp.edit_staff', staff_id=s._id) }}">
+                            <button type="button" class="btn-small" style="background:#3498db;">Edit</button>
+                        </a>
+                        <form method="POST"
+                              action="{{ url_for('auth_bp.delete_staff', staff_id=s._id) }}"
+                              onsubmit="return confirm('Are you sure you want to delete this employee?');">
+                            <button type="submit" class="btn-small" style="background:#e74c3c;">Delete</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+</div>
+{% else %}
+
+        <p style="margin-top:15px;">No employees found.</p>
+    {% endif %}
+    {% if total_pages > 1 %}
+<div class="pagination">
+    {% if page > 1 %}
+        <a href="?page={{ page-1 }}&q={{ search_query or '' }}&from_date={{ from_date or '' }}&to_date={{ to_date or '' }}">Prev</a>
+    {% endif %}
+
+    {% for p in range(1, total_pages+1) %}
+        {% if p == page %}
+            <span class="current">{{ p }}</span>
+        {% else %}
+            <a href="?page={{ p }}&q={{ search_query or '' }}&from_date={{ from_date or '' }}&to_date={{ to_date or '' }}">{{ p }}</a>
+        {% endif %}
+    {% endfor %}
+
+    {% if page < total_pages %}
+        <a href="?page={{ page+1 }}&q={{ search_query or '' }}&from_date={{ from_date or '' }}&to_date={{ to_date or '' }}">Next</a>
+    {% endif %}
+</div>
+{% endif %}
+
+
+</div>
+<script>
+    const staffSearch = document.getElementById("staffSearch");
+    const staffRows = document.querySelectorAll("#staffTableBody tr");
+
+    if (staffSearch) {
+        staffSearch.addEventListener("input", function () {
+            const term = this.value.toLowerCase();
+            staffRows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(term) ? "" : "none";
+            });
+        });
+    }
+</script>
+
+</body>
+</html>

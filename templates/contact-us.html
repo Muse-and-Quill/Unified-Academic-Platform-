@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Contact Us - Unified Academic Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #2b2b2b;
+      min-height: 100vh;
+      background-color: #f8f4ec;
+      overflow-x: hidden;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .bg-image {
+      position: fixed;
+      inset: 0;
+      background-image: url("https://plus.unsplash.com/premium_photo-1676068243733-df1880c2aef8?auto=format&fit=crop&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8Zmxvd2Vyc3xlbnwwfHwwfHx8MA%3D%3D&ixlib=rb-4.1.0");
+      background-position: center;
+      background-size: cover;
+      filter: blur(2px);
+      opacity: 0.8;
+      z-index: -2;
+    }
+
+    .bg-gradient {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(to bottom right, rgba(248,244,236,0.4), rgba(255,162,57,0.25));
+      z-index: -1;
+    }
+
+    /* NAVBAR (same as About page for consistency) */
+    .navbar-wrapper {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      margin-top: 1rem;
+      padding: 0 1rem;
+      position: relative;
+      z-index: 10;
+    }
+
+    .navbar {
+      backdrop-filter: blur(16px);
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      border-radius: 999px;
+      width: 100%;
+      max-width: 1100px;
+      height: 64px;
+      padding: 0.25rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+    }
+
+    .logo img {
+      width: 150px;
+      object-fit: contain;
+      transition: transform 0.2s ease;
+    }
+
+    .logo img:hover {
+      transform: scale(1.05);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      color: #63A361;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    .nav-link {
+      cursor: pointer;
+      transition: color 0.2s ease;
+      font-size: 1.05rem;
+    }
+
+    .nav-link:hover {
+      color: #427A76;
+    }
+
+    .btn-primary {
+      padding: 0.6rem 1.7rem;
+      background: #FFA239;
+      color: #fff;
+      border-radius: 999px;
+      border: none;
+      font-weight: 700;
+      font-size: 1rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      cursor: pointer;
+      transition: transform 0.15s ease, background 0.15s ease;
+    }
+
+    .btn-primary:hover {
+      background: #ff9933;
+      transform: scale(1.05);
+    }
+
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      font-size: 1.8rem;
+      color: #f8f4ec;
+      cursor: pointer;
+    }
+
+    .mobile-menu {
+      position: absolute;
+      top: 5.5rem;
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      background: rgba(255,255,255,0.3);
+      backdrop-filter: blur(18px);
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+      border: 1px solid rgba(255,255,255,0.4);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.2);
+      text-align: center;
+      z-index: 9;
+      display: none;
+      animation: fadeDown 0.25s ease-out;
+    }
+
+    .mobile-menu.open {
+      display: block;
+    }
+
+    .mobile-menu-inner {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      font-weight: 600;
+      font-size: 1.05rem;
+      color: #403A3E;
+    }
+
+    .mobile-menu-inner .btn-primary {
+      margin-top: 0.5rem;
+    }
+
+    @keyframes fadeDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* PAGE LAYOUT */
+    .page {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      width: 100%;
+    }
+
+    .page-main {
+      max-width: 1050px;
+      margin: 0 auto;
+      padding: 4.5rem 1.5rem 3rem;
+    }
+
+    .card-main {
+      backdrop-filter: blur(18px);
+      background: rgba(255,255,255,0.3);
+      border-radius: 1.8rem;
+      padding: 2.5rem 1.8rem;
+      border: 1px solid rgba(255,255,255,0.4);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.18);
+    }
+
+    h1 {
+      font-size: clamp(2.2rem, 2.7vw + 1.4rem, 3rem);
+      font-weight: 800;
+      margin-bottom: 0.6rem;
+      color: #540863;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    }
+
+    p {
+      line-height: 1.6;
+      color: rgba(0,0,0,0.8);
+      font-size: 0.98rem;
+    }
+
+    .contact-layout {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    .contact-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.8rem;
+      margin-top: 1.4rem;
+    }
+
+    .info-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.8rem;
+      border-radius: 0.9rem;
+      background: rgba(255,255,255,0.35);
+      border: 1px solid rgba(255,255,255,0.5);
+      transition: background 0.2s ease, transform 0.15s ease;
+      min-width: 0;
+    }
+
+    .info-card:hover {
+      background: rgba(255,255,255,0.45);
+      transform: translateY(-1px);
+    }
+
+    .icon-circle {
+      padding: 0.4rem 0.5rem;
+      border-radius: 0.6rem;
+      background: rgba(255,255,255,0.18);
+      flex-shrink: 0;
+      font-size: 1.1rem;
+    }
+
+    .info-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 0.15rem;
+    }
+
+    .info-text {
+      font-size: 0.85rem;
+      color: rgba(0,0,0,0.8);
+      word-wrap: break-word;
+      word-break: break-word;
+    }
+
+    .contact-form-container {
+      flex-basis: 48%;
+      min-width: 0;
+    }
+
+    .form-group {
+      margin-bottom: 0.8rem;
+    }
+
+    label {
+      font-size: 0.86rem;
+      font-weight: 600;
+      color: #540863;
+      display: block;
+      margin-bottom: 0.2rem;
+    }
+
+    .input-wrapper {
+      position: relative;
+      margin-top: 0.1rem;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 0.7rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.9rem;
+      color: #540863;
+      pointer-events: none;
+    }
+
+    .textarea-icon {
+      position: absolute;
+      left: 0.7rem;
+      top: 0.55rem;
+      font-size: 0.9rem;
+      color: #540863;
+      pointer-events: none;
+    }
+
+    input,
+    textarea {
+      width: 100%;
+      border-radius: 0.5rem;
+      border: 1px solid rgba(255,255,255,0.7);
+      background: rgba(255,255,255,0.5);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      padding: 0.55rem 0.75rem 0.55rem 2.1rem;
+      font-size: 0.9rem;
+      outline: none;
+      min-width: 0;
+    }
+
+    textarea {
+      padding-top: 1.2rem;
+      resize: vertical;
+      min-height: 90px;
+    }
+
+    input:focus,
+    textarea:focus {
+      border-color: #540863;
+      box-shadow: 0 0 0 2px rgba(84,8,99,0.2);
+      background: rgba(255,255,255,0.9);
+    }
+
+    .form-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      margin-top: 0.4rem;
+    }
+
+    .status-text {
+      font-size: 0.85rem;
+    }
+
+    .status-error {
+      color: #b45309;
+    }
+
+    .status-success {
+      color: #15803d;
+    }
+
+    .btn-submit {
+      padding: 0.55rem 1.6rem;
+      background: #FFA239;
+      color: #fff;
+      border-radius: 999px;
+      border: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+      transition: transform 0.12s ease, background 0.15s ease;
+    }
+
+    .btn-submit:hover {
+      background: #ff9933;
+      transform: scale(1.03);
+    }
+
+    /* Footer text under card */
+    .footer-text {
+      font-size: 0.85rem;
+      color: rgba(0,0,0,0.7);
+      margin-top: 1rem;
+    }
+
+    .footer-text a {
+      color: #540863;
+      text-decoration: underline;
+    }
+
+    /* Success modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      z-index: 999;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal {
+      background: #fff;
+      border-radius: 1.4rem;
+      padding: 1.8rem 1.6rem;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.6);
+      animation: popIn 0.25s ease-out;
+    }
+
+    @keyframes popIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.96);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+    }
+
+    .modal-icon {
+      padding: 0.6rem;
+      border-radius: 0.75rem;
+      background: #dcfce7;
+      font-size: 1.3rem;
+    }
+
+    .modal-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 0.1rem;
+    }
+
+    .modal-message {
+      font-size: 0.9rem;
+      color: rgba(17,24,39,0.8);
+      margin-top: 0.25rem;
+    }
+
+    .modal-close-btn {
+      margin-left: auto;
+      border: none;
+      background: none;
+      font-size: 1.1rem;
+      color: rgba(0,0,0,0.6);
+      cursor: pointer;
+    }
+
+    .modal-footer {
+      margin-top: 1.4rem;
+      text-align: right;
+    }
+
+    .btn-modal {
+      padding: 0.45rem 1.3rem;
+      border-radius: 999px;
+      border: none;
+      background: #540863;
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: filter 0.15s ease;
+    }
+
+    .btn-modal:hover {
+      filter: brightness(0.95);
+    }
+
+    @media (min-width: 768px) {
+      .nav-links {
+        display: flex;
+      }
+
+      .menu-toggle {
+        display: none;
+      }
+
+      .mobile-menu {
+        display: none !important;
+      }
+
+      .card-main {
+        padding: 3rem 2.5rem;
+      }
+
+      .contact-layout {
+        flex-direction: row;
+      }
+
+      .contact-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 767px) {
+      .nav-links {
+        display: none;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+
+      .card-main {
+        padding: 2.2rem 1.6rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-image"></div>
+  <div class="bg-gradient"></div>
+
+  <div class="page">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, message in messages %}
+      <div style="margin-bottom:8px; padding:8px 10px; border-radius:8px; font-size:0.9rem;"
+           class="{{ category }}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+    <!-- NAVBAR -->
+    <header class="navbar-wrapper">
+      <div class="navbar">
+        <a href="index.html" class="logo">
+          <img src="{{ url_for('static', filename='images/uap-logo.png') }}" alt="UAP Logo" />
+        </a>
+
+        <nav class="nav-links">
+          <a href="/" class="nav-link">Home</a>
+          <a href="/about" class="nav-link">About</a>
+          <a href="/contact" class="nav-link">Contact Us</a>
+          <a href="/login">
+            <button class="btn-primary">Sign In</button>
+          </a>
+        </nav>
+
+        <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation">
+          ☰
+        </button>
+      </div>
+
+      <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-inner">
+          <a href="/about" class="nav-link">About</a>
+          <a href="/contact-us" class="nav-link">Contact Us</a>
+          <a href="/login">
+            <button class="btn-primary">Sign In</button>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main class="page-main">
+      <section class="card-main">
+        <div class="contact-layout">
+          <!-- Left column: Info -->
+          <div class="contact-info">
+            <h1>Contact Us</h1>
+            <p>
+              Have a question, want to collaborate, or need support?
+              Send us a message and we’ll respond as soon as possible.
+            </p>
+
+            <div class="contact-grid">
+              <a href="mailto:info.unifiedacademics@gmail.com" class="info-card">
+                <div class="icon-circle">✉️</div>
+                <div>
+                  <p class="info-title">Email</p>
+                  <p class="info-text">info.unifiedacademics@gmail.com</p>
+                </div>
+              </a>
+
+              <a href="tel:+916201888810" class="info-card">
+                <div class="icon-circle">📞</div>
+                <div>
+                  <p class="info-title">Phone</p>
+                  <p class="info-text">+91 6201 888 810</p>
+                </div>
+              </a>
+
+              <div class="info-card">
+                <div class="icon-circle">📍</div>
+                <div>
+                  <p class="info-title">Office</p>
+                  <p class="info-text">City Campus, Block B, Room 210</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right column: Form -->
+          <div class="contact-form-container">
+<form id="contactForm" method="POST" action="/contact">
+              <div class="form-group">
+                <label for="name">Full name</label>
+                <div class="input-wrapper">
+                  <span class="input-icon">👤</span>
+                  <input
+                    id="name"
+                    name="name"
+                    type="text"
+                    placeholder="Your name"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="email">Email</label>
+                <div class="input-wrapper">
+                  <span class="input-icon">✉️</span>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="your.email@example.com"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="subject">Subject (optional)</label>
+                <div class="input-wrapper">
+                  <span class="input-icon">🏷️</span>
+                  <input
+                    id="subject"
+                    name="subject"
+                    type="text"
+                    placeholder="Subject of your message"
+                  />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="message">Message</label>
+                <div class="input-wrapper">
+                  <span class="textarea-icon">💬</span>
+                  <textarea
+                    id="message"
+                    name="message"
+                    placeholder="Tell us what's on your mind"
+                    required
+                  ></textarea>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="submit" class="btn-submit" id="submitButton">
+                  Send Message
+                </button>
+                <span class="status-text status-error" id="errorText" style="display:none;">
+                  Please check your details.
+                </span>
+                <span class="status-text status-success" id="successText" style="display:none;">
+                  Message sent!
+                </span>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer info -->
+      <section class="footer-text">
+        <p>Opening hours: Mon — Fri, 9:00 AM — 5:00 PM</p>
+        <p style="margin-top:0.25rem;">
+          For urgent help, call
+          <a href="tel:+916201888810">+91 6201 888 810</a>
+        </p>
+      </section>
+    </main>
+  </div>
+
+  <!-- Success Modal -->
+  <div class="modal-backdrop" id="successModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-icon">✅</div>
+        <div>
+          <p class="modal-title">Message sent</p>
+          <p class="modal-message">
+            Thanks for reaching out! We’ve received your message and will get back to you soon.
+          </p>
+        </div>
+        <button class="modal-close-btn" id="modalClose" aria-label="Close">✖</button>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-modal" id="modalOk">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Mobile navbar toggle
+    const menuToggle = document.getElementById("menuToggle");
+    const mobileMenu = document.getElementById("mobileMenu");
+
+    menuToggle.addEventListener("click", () => {
+      const isOpen = mobileMenu.classList.contains("open");
+      mobileMenu.classList.toggle("open", !isOpen);
+      menuToggle.textContent = isOpen ? "☰" : "✖";
+    });
+
+    // Contact form logic
+    const form = document.getElementById("contactForm");
+    const submitButton = document.getElementById("submitButton");
+    const errorText = document.getElementById("errorText");
+    const successText = document.getElementById("successText");
+    const successModal = document.getElementById("successModal");
+    const modalClose = document.getElementById("modalClose");
+    const modalOk = document.getElementById("modalOk");
+
+    function validateEmail(email) {
+      return /\S+@\S+\.\S+/.test(email);
+    }
+
+    
+  </script>
+</body>
+</html>

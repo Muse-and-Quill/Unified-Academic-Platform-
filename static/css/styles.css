@@ -1,0 +1,1163 @@
+/* =========================================================
+   SHARED SUBPAGE STYLES (forms, lists, profile, tickets...)
+   Works with theme variables defined in dashboard.css
+   ========================================================= */
+
+/* ========== GLOBAL RESET ========== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  background: var(--bg-body);
+  color: var(--text-main);
+  overflow-x: hidden;
+}
+
+/* =========================================================
+   BASE LAYOUT / CONTAINERS
+   - Use .page and .container on subpages
+   ========================================================= */
+
+.page {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 1100px;
+  width: 95%;
+  margin: 40px auto;
+  padding: 24px 22px 30px;
+  background: var(--bg-card);
+  border-radius: 18px;
+  border: 1px solid var(--summary-card-border);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.15);
+}
+
+/* slightly smaller on narrow screens */
+@media (max-width: 600px) {
+  .container {
+    margin: 18px auto;
+    padding: 18px 14px 22px;
+  }
+}
+
+/* =========================================================
+   HEADINGS / TEXT
+   ========================================================= */
+
+h1 {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--heading-color);
+  margin-bottom: 6px;
+}
+
+h2 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--heading-color);
+  margin: 20px 0 8px;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+p {
+  font-size: 14px;
+  color: var(--text-main);
+  line-height: 1.5;
+}
+
+/* =========================================================
+   BACK LINK / SMALL ACTION LINK
+   ========================================================= */
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  text-decoration: none;
+  color: var(--link-accent);
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid var(--btn-chip-border);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+  margin-bottom: 8px;
+  transition: 0.2s;
+}
+
+.back-link:hover {
+  background: rgba(255, 255, 255, 0.96);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.16);
+}
+
+/* Dark theme tweaks so back-link still looks good */
+body.theme-dark .back-link {
+  background: #020617;
+  color: var(--link-accent);
+  border-color: rgba(148, 163, 184, 0.7);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+}
+
+/* =========================================================
+   FLASH MESSAGES & ALERTS
+   ========================================================= */
+
+.flash {
+  padding: 8px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  margin: 8px 0;
+}
+
+.flash.success {
+  background: rgba(99, 163, 97, 0.12);
+  border: 1px solid rgba(99, 163, 97, 0.4);
+  color: #2d6a2d;
+}
+
+.flash.error {
+  background: rgba(192, 57, 43, 0.08);
+  border: 1px solid rgba(192, 57, 43, 0.4);
+  color: #c0392b;
+}
+
+/* more generic alert style (for forms, uploads, etc.) */
+.alert {
+  padding: 10px 14px;
+  border-radius: 12px;
+  margin: 10px 0;
+  font-size: 14px;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(6px);
+  animation: slideIn 0.3s ease;
+}
+
+.alert.success {
+  color: #2e7d32;
+  background: rgba(76, 175, 80, 0.18);
+}
+
+.alert.error {
+  color: #b71c1c;
+  background: rgba(244, 67, 54, 0.18);
+}
+
+.alert.warning {
+  color: #8a4c15;
+  background: rgba(255, 162, 57, 0.2);
+}
+
+.alert.info {
+  color: #01579b;
+  background: rgba(33, 150, 243, 0.2);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* =========================================================
+   SEARCH BAR / TOP BAR
+   - Used on listing pages (students, staff, tickets, etc.)
+   ========================================================= */
+
+.top-bar {
+  margin-top: 10px;
+  margin-bottom: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.search-form {
+  margin: 12px 0 8px;
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  max-width: 420px;
+}
+
+.search-form input[type="text"] {
+  flex: 1;
+  padding: 9px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.9);
+  outline: none;
+}
+
+.search-form input[type="text"]:focus {
+  border-color: var(--btn-primary-bg);
+  box-shadow: 0 0 0 2px rgba(255, 162, 57, 0.25);
+  background: rgba(255, 255, 255, 0.98);
+}
+
+.search-form button {
+  padding: 9px 16px;
+  border-radius: 12px;
+  border: none;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
+  transition: 0.2s;
+}
+
+.search-form button:hover {
+  background: var(--btn-primary-bg-hover);
+  transform: translateY(-1px);
+}
+
+/* generic primary button (for small actions on tables) */
+.btn-primary {
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: none;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+  transition: 0.2s;
+}
+
+.btn-primary:hover {
+  background: var(--btn-primary-bg-hover);
+  transform: translateY(-1px);
+}
+
+/* =========================================================
+   TABLES (LIST PAGES)
+   ========================================================= */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 12px;
+  font-size: 13px;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+thead {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+th,
+td {
+  padding: 9px 8px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+.msg-cell {
+  max-width: 340px;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+/* delete / danger button in tables */
+.btn-delete {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: none;
+  background: #e74c3c;
+  color: #ffffff;
+  font-size: 12px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-delete:hover {
+  background: #c0392b;
+  transform: translateY(-1px);
+}
+
+/* status chips: e.g., ticket status */
+.status-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+}
+
+.status-new {
+  background: rgba(52, 152, 219, 0.12);
+  color: #2980b9;
+}
+
+.status-seen {
+  background: rgba(46, 204, 113, 0.12);
+  color: #27ae60;
+}
+
+.status-closed {
+  background: rgba(149, 165, 166, 0.18);
+  color: #7f8c8d;
+}
+
+/* pagination under tables */
+.pagination {
+  margin-top: 14px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 13px;
+}
+
+.pagination a {
+  padding: 4px 9px;
+  border-radius: 999px;
+  border: 1px solid #ddd;
+  text-decoration: none;
+  color: #333;
+}
+
+.pagination a:hover {
+  background: #f0f0f0;
+}
+
+.pagination span.current {
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+  font-weight: 600;
+}
+
+/* =========================================================
+   FORMS (ADD / EDIT PAGES)
+   ========================================================= */
+
+form {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+form .row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+form .row > div {
+  display: flex;
+  flex-direction: column;
+}
+
+/* single-column layout on small screens */
+@media (max-width: 720px) {
+  form .row {
+    grid-template-columns: 1fr;
+  }
+}
+
+label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin-bottom: 4px;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.96);
+  font-size: 14px;
+  outline: none;
+  transition: 0.2s;
+  color: var(--text-main);
+}
+
+textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #999;
+  font-size: 13px;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--btn-primary-bg);
+  box-shadow: 0 0 0 2px rgba(255, 162, 57, 0.25);
+  background: rgba(255, 255, 255, 1);
+}
+
+/* read-only fields (e.g., IDs) */
+.readonly {
+  background: rgba(0, 0, 0, 0.02);
+  border-style: dashed;
+  cursor: default;
+}
+
+body.theme-dark .readonly {
+  background: rgba(15, 23, 42, 0.9);
+  border-color: rgba(148, 163, 184, 0.4);
+}
+
+/* form actions (buttons at bottom) */
+.btn-row {
+  margin-top: 16px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 8px 16px;
+  font-size: 13px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: 0.2s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* secondary "edit" style */
+.btn-edit {
+  background: var(--btn-chip-bg);
+  color: var(--btn-chip-text);
+  border: 1px solid var(--btn-chip-border);
+}
+
+.btn-edit:hover {
+  background: rgba(254, 243, 230, 0.9);
+  transform: translateY(-1px);
+}
+
+/* primary "save" style */
+.btn-save,
+.btn-submit {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+}
+
+.btn-save:hover,
+.btn-submit:hover {
+  background: var(--btn-primary-bg-hover);
+  transform: translateY(-1px);
+}
+
+/* neutral cancel button */
+.btn-cancel {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.btn-cancel:hover {
+  background: #d1d5db;
+  transform: translateY(-1px);
+}
+
+body.theme-dark .btn-cancel {
+  background: #111827;
+  color: #e5e7eb;
+}
+
+body.theme-dark .btn-cancel:hover {
+  background: #020617;
+}
+
+/* helper text under forms (login, etc.) */
+.helper-text {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.helper-text a {
+  color: var(--link-accent);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.helper-text a:hover {
+  text-decoration: underline;
+}
+
+/* =========================================================
+   PROFILE STYLE (faculty / student / staff detail page)
+   ========================================================= */
+
+.profile-top {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin: 18px 0 20px;
+}
+
+.avatar-wrapper {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: var(--bg-card-strong);
+  border: 2px solid var(--btn-chip-border);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--heading-color);
+  overflow: hidden;
+}
+
+.avatar-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.basic-info p {
+  margin: 2px 0;
+  font-size: 14px;
+}
+
+.basic-info p strong {
+  font-size: 16px;
+}
+
+.tag {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: var(--pill-bg);
+  color: var(--pill-text);
+}
+
+@media (max-width: 600px) {
+  .profile-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* =========================================================
+   FILE UPLOAD BOX (for bulk import, etc.)
+   ========================================================= */
+
+.upload-box {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px dashed rgba(0, 0, 0, 0.18);
+  font-size: 13px;
+}
+
+.upload-box form {
+  margin-top: 6px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.upload-box input[type="file"] {
+  font-size: 13px;
+}
+
+/* =========================================================
+   SIMPLE LOGIN LAYOUT (optional, if you reuse these classes)
+   ========================================================= */
+
+.login-wrapper {
+  max-width: 900px;
+  margin: 40px auto;
+  padding: 24px 20px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.16);
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 18px;
+  animation: fadeInLogin 0.7s ease-out;
+}
+
+.login-info {
+  padding-right: 12px;
+  border-right: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.login-card {
+  padding-left: 6px;
+}
+
+.login-info h1 {
+  font-size: 28px;
+}
+
+.login-info p {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+@keyframes fadeInLogin {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 900px) {
+  .login-wrapper {
+    grid-template-columns: 1fr;
+    padding: 22px 18px;
+  }
+  .login-info {
+    border-right: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+    padding-bottom: 14px;
+    margin-bottom: 6px;
+  }
+  .login-card {
+    padding-left: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .login-info h1 {
+    font-size: 24px;
+  }
+}
+
+/* SAVE BUTTON (Primary Action Button) */
+.btn-save {
+    padding: 10px 20px;
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    outline: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: all 0.25s ease;
+}
+
+/* Hover */
+.btn-save:hover {
+    background: var(--btn-primary-bg-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.22);
+}
+
+/* Active (click) */
+.btn-save:active {
+    transform: scale(0.97);
+    box-shadow: 0 3px 10px rgba(0,0,0,0.12);
+}
+
+/* Dark theme adjustments */
+body.theme-dark .btn-save {
+    box-shadow: 0 5px 14px rgba(0,0,0,0.55);
+}
+
+body.theme-dark .btn-save:hover {
+    box-shadow: 0 7px 18px rgba(0,0,0,0.65);
+}
+
+/* Disabled state */
+.btn-save:disabled {
+    background: #cfcfcf;
+    color: #777;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* =========================================================
+   SMALL ACTION BUTTONS (Edit / Delete)
+   ========================================================= */
+
+.btn-small {
+    padding: 6px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    color: #fff;
+    transition: all 0.2s ease;
+    display: inline-block;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+}
+
+/* EDIT BUTTON (Blue) */
+.btn-edit {
+    background: #3498db;
+}
+.btn-edit:hover {
+    background: #2980b9;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.22);
+}
+
+/* DELETE BUTTON (Red) */
+.btn-danger {
+    background: #e74c3c;
+}
+.btn-danger:hover {
+    background: #c0392b;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.22);
+}
+
+/* Active press animation */
+.btn-small:active {
+    transform: scale(0.95);
+}
+
+/* Dark theme enhancement */
+body.theme-dark .btn-small {
+    box-shadow: 0 4px 14px rgba(0,0,0,0.55);
+}
+/* =========================================================
+   SEARCH FORM LAYOUT IMPROVED
+   ========================================================= */
+
+.search-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Row that holds text input, dates and search button */
+.search-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Action buttons under the row */
+.search-actions {
+    margin-top: 4px;
+}
+
+/* Upload button styled like a normal button */
+.btn-upload {
+    display: inline-block;
+    padding: 8px 16px;
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 12px;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: 0.2s ease;
+}
+
+.btn-upload:hover {
+    background: var(--btn-primary-bg-hover);
+    transform: translateY(-2px);
+}
+/* Search Form */
+.search-form {
+    width: 100%;
+}
+
+/* Everything in one clean row */
+.search-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+/* Upload button styled nicely */
+.btn-upload {
+    padding: 8px 16px;
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 12px;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transition: 0.2s ease;
+}
+
+.btn-upload:hover {
+    background: var(--btn-primary-bg-hover);
+    transform: translateY(-2px);
+}
+/* ================================
+   DARK MODE FIX FOR TABLES
+   ================================ */
+
+body.theme-dark table {
+    background: var(--bg-card);      /* matches dark card bg */
+    color: var(--text-main);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+}
+
+body.theme-dark th{
+    color: rgb(252, 164, 179);
+}
+body.theme-dark thead {
+    background: rgba(255, 255, 255, 0.05); /* subtle dark header */
+    color: var(--text-main);
+}
+
+body.theme-dark th,
+body.theme-dark td {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+}
+
+body.theme-dark td {
+    color: skyblue;
+}
+body.theme-dark tr:last-child td {
+    border-bottom: none;
+}
+
+/* Optional: zebra row effect for dark mode */
+body.theme-dark tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+/* ===========================================
+   DARK MODE FIX – UPLOAD BOX
+   =========================================== */
+
+body.theme-dark .upload-box {
+    background: var(--bg-card);   /* dark card background */
+    border: 1px dashed rgba(148, 163, 184, 0.35);
+    color: var(--text-main);
+}
+
+/* Make code tags visible in dark mode */
+body.theme-dark .upload-box code {
+    background: rgba(255, 255, 255, 0.08);
+    padding: 2px 4px;
+    border-radius: 4px;
+    color: var(--text-main);
+}
+
+/* Input field dark fix */
+body.theme-dark .upload-box input[type="file"] {
+    background: rgba(15, 23, 42, 0.9);
+    color: var(--text-main);
+    border: 1px solid rgba(148, 163, 184, 0.4);
+}
+
+/* Button already themed, just shadow fix */
+body.theme-dark .upload-box .btn-primary {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.55);
+}
+
+/* ===========================================================
+   DARK MODE FIX — FORM FIELDS (input, select, textarea)
+   =========================================================== */
+
+body.theme-dark input,
+body.theme-dark select,
+body.theme-dark textarea {
+    background: rgba(15, 23, 42, 0.9); /* deep slate background */
+    color: var(--text-main);           /* readable text */
+    border: 1px solid rgba(148, 163, 184, 0.35);
+    box-shadow: none;
+}
+
+/* Placeholder text should be visible in dark mode */
+body.theme-dark input::placeholder,
+body.theme-dark textarea::placeholder {
+    color: rgba(148, 163, 184, 0.6);
+}
+
+/* Focus state */
+body.theme-dark input:focus,
+body.theme-dark select:focus,
+body.theme-dark textarea:focus {
+    background: rgba(30, 41, 59, 0.95); /* slightly lighter on focus */
+    border-color: var(--btn-primary-bg);
+    box-shadow: 0 0 0 2px rgba(255, 162, 57, 0.35);
+}
+
+/* Disabled inputs */
+body.theme-dark input[readonly],
+body.theme-dark input[disabled],
+body.theme-dark textarea[readonly] {
+    background: rgba(15, 23, 42, 0.6);
+    border-style: dashed;
+    color: rgba(148, 163, 184, 0.6);
+}
+
+/* ============================================
+   RESPONSIVE LAYOUT TWEAKS (TABLET + MOBILE)
+   ============================================ */
+
+/* Up to tablets (~900px) */
+@media (max-width: 900px) {
+
+  /* Make content use almost full screen width */
+  .content {
+    max-width: 100%;
+    padding: 16px 12px 28px;
+  }
+
+  /* Section header: title + subtitle stack instead of in a row */
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  /* Overview stats: cards wrap nicely */
+  .stats-row {
+    justify-content: flex-start;
+  }
+
+  /* Bulk upload cards are already 1-column below 850px via .bulk-grid */
+  .upload-card {
+    padding: 12px 12px 14px;
+  }
+
+  .upload-card h3 {
+    font-size: 15px;
+  }
+
+  .upload-card p,
+  .helper-text {
+    font-size: 12px;
+  }
+
+  /* Summary cards: make sure they fill width and have breathing space */
+  .summary-card {
+    padding: 14px 14px 16px;
+  }
+
+  .summary-card h3 {
+    font-size: 14px;
+  }
+
+  .summary-card table {
+    font-size: 11px;
+  }
+
+  /* Downloads row: wrap and allow buttons to expand */
+  .download-row {
+    justify-content: flex-start;
+  }
+
+  .download-row .btn-chip {
+    flex: 1 1 auto;
+    text-align: center;
+  }
+}
+
+/* Phones / small devices (~600px and below) */
+@media (max-width: 600px) {
+
+  /* Navbar container a bit tighter */
+  .nav-container {
+    margin: 0 8px;
+    padding: 6px 14px;
+    border-radius: 20px;
+  }
+
+  .logo {
+    height: 30px;
+  }
+
+  /* Headings slightly smaller for mobile */
+  .section-title {
+    font-size: 18px;
+  }
+
+  .welcome-title {
+    font-size: 19px;
+  }
+
+  .welcome-sub {
+    font-size: 12px;
+  }
+
+  .pill {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+
+  /* Quick actions & stats: full width chips/cards */
+  .quick-actions {
+    gap: 6px;
+  }
+
+  .quick-actions .btn-chip {
+    flex: 1 1 100%;
+    text-align: center;
+  }
+
+  .stats-row {
+    gap: 8px;
+  }
+
+  .stat-card {
+    flex: 1 1 calc(50% - 8px);
+  }
+
+  /* Cards: a bit less padding so they feel natural on phone */
+  .card {
+    padding: 12px 12px 14px;
+    border-radius: 16px;
+  }
+
+  /* Tables: allow horizontal scroll instead of squishing */
+  .summary-card table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .summary-card table thead,
+  .summary-card table tbody,
+  .summary-card table tr,
+  .summary-card table th,
+  .summary-card table td {
+    white-space: nowrap;
+  }
+
+  /* Download buttons stack and fill width if needed */
+  .download-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .download-row .btn-chip {
+    width: 100%;
+  }
+}
+/* base */
+.container {
+  max-width: 1100px;
+  width: 95%;
+  margin: 40px auto;
+  padding: 24px 22px 30px;
+}
+
+/* phones */
+@media (max-width: 600px) {
+  .container {
+    width: 100%;
+    max-width: 100%;
+    margin: 10px 0;
+    border-radius: 0;           /* optional: edge-to-edge card */
+    padding: 14px 10px 18px;
+  }
+}
+/* =========================================
+   RESPONSIVE TABLE WRAPPER
+   ========================================= */
+
+.table-scroll {
+    width: 100%;
+    overflow-x: auto;      /* horizontal scroll on small screens */
+}
+
+/* keep table at a readable width, allow scrolling on phones */
+.table-scroll table {
+    min-width: 720px;      /* adjust if you want narrower */
+}
+
+/* On very small screens, avoid huge side padding so scroll feels natural */
+@media (max-width: 600px) {
+    .container {
+        width: 100%;
+        max-width: 100%;
+        margin: 10px 0;
+        padding: 14px 10px 18px;
+        border-radius: 0;
+    }
+}
+
+/* ============================================
+   DARK MODE — SEARCH BAR FIELDS
+   ============================================ */
+
+body.theme-dark .search-form input[type="text"],
+body.theme-dark .search-form input[type="date"],
+body.theme-dark .search-form select {
+    background: rgba(15, 23, 42, 0.88);      /* deep dark bg */
+    color: var(--text-main);                 /* readable text */
+    border: 1px solid rgba(148, 163, 184, 0.45);
+    box-shadow: none;
+}
+
+/* placeholder color */
+body.theme-dark .search-form input::placeholder {
+    color: rgba(148, 163, 184, 0.6);
+}
+
+/* Focus state */
+body.theme-dark .search-form input[type="text"]:focus,
+body.theme-dark .search-form input[type="date"]:focus,
+body.theme-dark .search-form select:focus {
+    background: rgba(30, 41, 59, 0.95);
+    border-color: var(--btn-primary-bg);
+    box-shadow: 0 0 0 2px rgba(255, 162, 57, 0.35);
+}

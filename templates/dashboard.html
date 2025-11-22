@@ -3,641 +3,526 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>UAP – HSD / DICT Dashboard</title>
+<title>UAP –DICT Dashboard</title>
 
 <!-- GOOGLE FONTS -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 <style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-        font-family: "Poppins", sans-serif;
-    }
+    /* ============================================================
+   DARK MODE FIXES — CHIP BUTTONS (Manage & Download buttons)
+   ============================================================ */
 
-    body {
-        overflow-x: hidden;
-    }
+body.theme-dark .btn-chip {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-main);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 3px 12px rgba(0,0,0,0.45);
+}
 
-    /* ================= PRELOADER ================= */
-    #preloader {
-        position: fixed;
-        inset: 0;
-        background: linear-gradient(to bottom right, #FCF5EE, #EBD5AB);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 9999;
-    }
+body.theme-dark .btn-chip:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: rgb(121, 208, 242);
+    border-color: rgba(255, 255, 255, 0.28);
+    transform: translateY(-2px);
+}
 
-    #preloader img {
-        width: 120px;
-        height: 120px;
-        animation: pulse 1.5s infinite ease-in-out;
-    }
-
-    @keyframes pulse {
-        0% { transform: scale(1); opacity: 1; }
-        50% { transform: scale(1.1); opacity: 0.7; }
-        100% { transform: scale(1); opacity: 1; }
-    }
-
-    /* ================= BACKGROUND ================= */
-    .bg-image {
-        position: absolute;
-        inset: 0;
-        background-image: url("https://plus.unsplash.com/premium_photo-1676068243733-df1880c2aef8?auto=format&fit=crop");
-        background-size: cover;
-        background-position: center;
-        filter: blur(3px);
-        opacity: 0.8;
-        z-index: -2;
-    }
-
-    .bg-overlay {
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(to bottom right, rgba(248,244,236,0.6), rgba(255,162,57,0.3));
-        z-index: -1;
-    }
-
-    /* ================= NAVBAR ================= */
-    .navbar {
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        padding-top: 20px;
-        position: relative;
-        z-index: 999;
-    }
-
-    .nav-container {
-        width: 100%;
-        max-width: 1100px;
-        height: 70px;
-        padding: 8px 25px;
-
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-
-        border-radius: 50px;
-
-        backdrop-filter: blur(15px);
-        background: rgba(255, 255, 255, 0.22);
-        border: 1px solid rgba(255, 255, 255, 0.35);
-
-        box-shadow: 0px 8px 25px rgba(0,0,0,0.15);
-
-        opacity: 0;
-        transform: translateY(-40px);
-        animation: navFade 0.6s ease-out forwards;
-    }
-
-    @keyframes navFade {
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .logo {
-        width: 150px;
-        transition: 0.3s;
-    }
-
-    .logo:hover {
-        transform: scale(1.05);
-    }
-
-    .menu {
-        display: flex;
-        align-items: center;
-        gap: 30px;
-        font-weight: 600;
-    }
-
-    .menu a {
-        text-decoration: none;
-        color: #63A361;
-        font-size: 18px;
-        transition: 0.3s;
-    }
-
-    .menu a:hover {
-        color: #427A76;
-    }
-
-    .btn-primary {
-        padding: 10px 32px;
-        background: #FFA239;
-        color: white;
-        border: none;
-        border-radius: 40px;
-        font-size: 18px;
-        font-weight: bold;
-        cursor: pointer;
-        box-shadow: 0px 5px 15px rgba(0,0,0,0.2);
-        transition: 0.3s;
-    }
-
-    .btn-primary:hover {
-        background: #ff9933;
-        transform: scale(1.05);
-    }
-
-    /* MOBILE NAV */
-    .menu-btn {
-        display: none;
-        font-size: 32px;
-        color: #F8F4EC;
-        cursor: pointer;
-    }
-
-    .mobile-menu {
-        position: absolute;
-        top: 110px;
-        width: 100%;
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 25px;
-
-        background: rgba(255,255,255,0.28);
-        backdrop-filter: blur(15px);
-        border-radius: 25px;
-        border: 1px solid rgba(255,255,255,0.4);
-        box-shadow: 0px 5px 25px rgba(0, 0, 0, 0.15);
-
-        display: none;
-        flex-direction: column;
-        text-align: center;
-        gap: 18px;
-
-        animation: dropdown 0.35s ease-out;
-    }
-
-    @keyframes dropdown {
-        from { opacity: 0; transform: translateY(-15px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    .mobile-menu a {
-        text-decoration: none;
-        color: #403A3E;
-        font-size: 20px;
-        font-weight: 600;
-    }
-
-    .mobile-btn {
-        margin-top: 10px;
-    }
-
-    @media (max-width: 768px) {
-        .menu {
-            display: none;
-        }
-        .menu-btn {
-            display: block;
-        }
-    }
-
-    /* ================= DASHBOARD MAIN ================= */
-    main {
-        min-height: 80vh;
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        padding: 30px 20px 40px;
-    }
-
-    .dashboard-wrapper {
-        width: 100%;
-        max-width: 1100px;
-        background: rgba(255, 255, 255, 0.26);
-        border-radius: 30px;
-        border: 1px solid rgba(255,255,255,0.4);
-        backdrop-filter: blur(12px);
-        box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.15);
-
-        padding: 25px 25px 30px;
-        opacity: 0;
-        transform: translateY(20px);
-        animation: fadeIn 1.2s ease-out forwards 0.3s;
-
-        display: grid;
-        grid-template-columns: 1.2fr 1.5fr;
-        gap: 25px;
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    .left-panel {
-        border-right: 1px solid rgba(255,255,255,0.7);
-        padding-right: 20px;
-    }
-
-    .right-panel {
-        padding-left: 10px;
-    }
-
-    .welcome-title {
-        font-size: 26px;
-        color: #540863;
-        font-weight: 700;
-        margin-bottom: 6px;
-    }
-
-    .welcome-sub {
-        font-size: 14px;
-        color: #555;
-        margin-bottom: 10px;
-    }
-
-    .pill {
-        display: inline-block;
-        margin-top: 8px;
-        padding: 4px 10px;
-        border-radius: 999px;
-        font-size: 12px;
-        font-weight: 600;
-        background: rgba(255,162,57,0.15);
-        color: #8a4c15;
-    }
-
-    .stats {
-        margin-top: 18px;
-        display: flex;
-        gap: 15px;
-        flex-wrap: wrap;
-    }
-
-    .stat-card {
-        min-width: 120px;
-        padding: 10px 12px;
-        border-radius: 16px;
-        background: rgba(255,255,255,0.9);
-        border: 1px solid rgba(0,0,0,0.04);
-        box-shadow: 0px 4px 12px rgba(0,0,0,0.08);
-    }
-
-    .stat-label {
-        font-size: 12px;
-        color: #666;
-    }
-
-    .stat-value {
-        font-size: 20px;
-        font-weight: 700;
-        color: #333;
-    }
-
-    .section-heading {
-        font-size: 18px;
-        font-weight: 600;
-        color: #333;
-        margin-bottom: 12px;
-    }
-
-    .flash-messages {
-        margin-bottom: 12px;
-    }
-
-    .flash-item {
-        margin-bottom: 6px;
-        padding: 8px 10px;
-        border-radius: 12px;
-        font-size: 13px;
-    }
-
-    .flash-item.success {
-        background: rgba(99, 163, 97, 0.12);
-        color: #2d6a2d;
-        border: 1px solid rgba(99, 163, 97, 0.4);
-    }
-
-    .flash-item.error {
-        background: rgba(192, 57, 43, 0.08);
-        color: #c0392b;
-        border: 1px solid rgba(192, 57, 43, 0.35);
-    }
-
-    .upload-grid {
-        display: grid;
-        grid-template-columns: 1fr;
-        gap: 18px;
-    }
-
-    @media (min-width: 900px) {
-        .upload-grid {
-            grid-template-columns: 1fr 1fr;
-        }
-    }
-
-    .upload-card {
-        background: rgba(255,255,255,0.95);
-        border-radius: 20px;
-        padding: 16px 14px 16px;
-        border: 1px solid rgba(0,0,0,0.05);
-        box-shadow: 0px 4px 14px rgba(0,0,0,0.08);
-    }
-
-    .upload-card h3 {
-        font-size: 16px;
-        margin-bottom: 6px;
-        color: #333;
-    }
-
-    .upload-card p {
-        font-size: 13px;
-        color: #666;
-        margin-bottom: 10px;
-    }
-
-    form {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-
-    label {
-        font-size: 12px;
-        font-weight: 600;
-        color: #333;
-    }
-
-    input, select {
-        padding: 8px 10px;
-        border-radius: 10px;
-        border: 1px solid rgba(0,0,0,0.12);
-        font-size: 13px;
-        background: rgba(255,255,255,0.95);
-        outline: none;
-        transition: 0.2s;
-    }
-
-    input:focus, select:focus {
-        border-color: #FFA239;
-        box-shadow: 0 0 0 2px rgba(255,162,57,0.25);
-    }
-
-    .btn-upload {
-        margin-top: 4px;
-        padding: 8px 12px;
-        font-size: 14px;
-        background: #FFA239;
-        color: #fff;
-        border: none;
-        border-radius: 999px;
-        cursor: pointer;
-        font-weight: 600;
-        transition: 0.25s;
-        box-shadow: 0px 4px 12px rgba(0,0,0,0.15);
-    }
-
-    .btn-upload:hover {
-        background: #ff9933;
-        transform: translateY(-1px);
-    }
-
-    .helper-text {
-        font-size: 11px;
-        color: #777;
-    }
-
-    @media (max-width: 900px) {
-        .dashboard-wrapper {
-            grid-template-columns: 1fr;
-            padding: 22px 18px 26px;
-        }
-        .left-panel {
-            border-right: none;
-            border-bottom: 1px solid rgba(255,255,255,0.7);
-            padding-right: 0;
-            padding-bottom: 15px;
-            margin-bottom: 5px;
-        }
-        .right-panel {
-            padding-left: 0;
-        }
-    }
 </style>
 </head>
 
-<body>
-
-<!-- ================= PRELOADER ================= -->
-<div id="preloader">
+<body class="theme-default">
+  <!-- PRELOADER -->
+  <div id="preloader">
     <img src="{{ url_for('static', filename='images/preloader.gif') }}" alt="Loading...">
-</div>
+  </div>
 
-<div class="bg-image"></div>
-<div class="bg-overlay"></div>
+  <div class="bg-image"></div>
+  <div class="bg-overlay"></div>
 
-<!-- ================= NAVBAR ================= -->
-<nav class="navbar">
-    <div class="nav-container">
-        <a href="/">
-            <!-- Make sure this path/filename matches your logo in /static -->
-            <img src="{{ url_for('static', filename='images/uap-logo.png') }}" alt="UAP Logo" class="logo">
+  <div class="page">
+    <!-- NAVBAR -->
+    <nav class="navbar">
+      <div class="nav-container">
+        <a href="/" class="logo-link">
+          <img src="{{ url_for('static', filename='images/uap-logo.png') }}" alt="UAP Logo" class="logo">
         </a>
 
-        <div class="menu">
-            <a href="/about">About</a>
-            <a href="/contact">Contact Us</a>
+        <a href="{{ url_for('auth_bp.dict_profile') }}" class="nav-avatar-link">
+          <div class="nav-avatar">
+            {% if emp and emp.profile_photo %}
+              <img src="/{{ emp.profile_photo }}" alt="Profile">
+            {% else %}
+              <span>{{ (emp.name[0] if emp and emp.name else user_name[0]) }}</span>
+            {% endif %}
+          </div>
+        </a>
+
+        <div class="nav-right">
+          <div class="nav-links">
+            <a href="#overview">Overview</a>
+            <a href="#bulk-upload">Bulk Upload</a>
+            <a href="#summary">Summary</a>
+            <a href="#downloads">Downloads</a>
+
+            <!-- These are now pure links, not buttons -->
+            <a href="{{ url_for('auth_bp.dict_contact_requests') }}" class="btn-chip">Contact Requests</a>
+            <a href="{{ url_for('auth_bp.dict_profile') }}" class="btn-chip">My Profile</a>
+
             <a href="{{ url_for('auth_bp.logout') }}">
-                <button class="btn-primary">Logout</button>
+              <button class="btn-primary" type="button">Logout</button>
             </a>
+          </div>
+
+          <!-- Theme selector -->
+          <select id="themeSelect" class="theme-select" aria-label="Select theme">
+
+            <option value="default">Default</option>
+            <option value="rose">Rose</option>
+            <option value="tulip">Tulip</option>
+            <option value="beach">Beach</option>
+            <option value="golden">Golden</option>
+            <option value="dark">Dark Mode</option>
+          </select>
+
+          <button class="menu-btn" id="menuBtn" aria-label="Toggle navigation">☰</button>
         </div>
+      </div>
 
-        <div class="menu-btn" id="menuBtn">☰</div>
-    </div>
+      <!-- MOBILE MENU -->
+      <div class="mobile-menu" id="mobileMenu">
+        <a href="#overview">Overview</a>
+        <a href="#bulk-upload">Upload</a>
+        <a href="#summary">Summary</a>
+        <a href="#downloads">Downloads</a>
 
-    <div class="mobile-menu" id="mobileMenu">
-        <a href="/about">About</a>
-        <a href="/contact">Contact Us</a>
+        <a href="{{ url_for('auth_bp.dict_contact_requests') }}">Contact Requests</a>
+        <a href="{{ url_for('auth_bp.dict_profile') }}">My Profile</a>
         <a href="{{ url_for('auth_bp.logout') }}">
-            <button class="btn-primary mobile-btn">Logout</button>
+          <button class="btn-primary" type="button">Logout</button>
         </a>
-    </div>
-</nav>
+      </div>
+    </nav>
 
-<!-- ================= DASHBOARD CONTENT ================= -->
-<main>
-    <div class="dashboard-wrapper">
-        <!-- LEFT PANEL -->
-        <div class="left-panel">
-            <div>
-                <div class="welcome-title">
-                    Hello, {{ user_name }}
-                </div>
-                <div class="welcome-sub">
-                    Employee ID: <strong>{{ employee_id }}</strong><br/>
-                    You are in the Help &amp; Support (DICT) Dashboard.
-                </div>
-                <span class="pill">HSD • Bulk Onboarding • Secure Credentials</span>
-            </div>
-
-            <div class="stats">
-                <div class="stat-card">
-                    <div class="stat-label">Total Students</div>
-                    <div class="stat-value">{{ student_count }}</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Total Teachers</div>
-                    <div class="stat-value">{{ teacher_count }}</div>
-                </div>
-            </div>
-
-            <div style="margin-top:18px; font-size:13px; color:#555;">
-                <p><strong>Tip:</strong> Upload clean CSV/Excel files. Credentials will be emailed automatically to each record after upload.</p>
-            </div>
+    <!-- MAIN CONTENT -->
+    <main class="content">
+      <!-- ========== SECTION 1: OVERVIEW ========== -->
+      <section id="overview">
+        <div class="section-header">
+          <h2 class="section-title">DICT Dashboard</h2>
+          <p class="section-subtitle">Overview of onboarding and academic identities.</p>
         </div>
 
-        <!-- RIGHT PANEL -->
-        <div class="right-panel">
-            <div class="section-heading">Bulk Upload</div>
-
-            <!-- FLASH MESSAGES -->
-            <div class="flash-messages">
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                  {% if messages %}
-                    {% for category, message in messages %}
-                      <div class="flash-item {{ category }}">
-                          {{ message }}
-                      </div>
-                    {% endfor %}
-                  {% endif %}
-                {% endwith %}
+        <div class="overview-top card card-hover reveal-card">
+          <div class="overview-main">
+            <div class="welcome-title">Welcome, {{ emp.name if emp else user_name }}</div>
+            <div class="welcome-sub">
+              Employee ID: <strong>{{ employee_id }}</strong><br/>
+              You are in the Help &amp; Support (DICT) Dashboard.
             </div>
+            <span class="pill">HSD • Bulk Onboarding • Secure Credentials</span>
 
-            <div class="upload-grid">
-                <!-- STUDENT UPLOAD CARD -->
-                <div class="upload-card">
-                    <h3>Upload Students</h3>
-                    <p>Generate Registration No, Department-wise Roll No, and email credentials.</p>
-
-                    <form method="POST"
-                          action="{{ url_for('auth_bp.upload_students') }}"
-                          enctype="multipart/form-data">
-                        <div>
-                            <label for="student_department">Department</label>
-                            <input type="text" id="student_department" name="student_department"
-                                   placeholder="e.g. CSE" required />
-                        </div>
-
-                        <div>
-                            <label for="student_category">Category (optional)</label>
-                            <input type="text" id="student_category" name="student_category"
-                                   placeholder="Regular / Scholarship" />
-                        </div>
-
-                        <div>
-                            <label for="student_label">Label (optional)</label>
-                            <input type="text" id="student_label" name="student_label"
-                                   placeholder="Hostel / Day Scholar" />
-                        </div>
-
-                        <div>
-                            <label for="student_session_start_year">Session Start Year</label>
-                            <input type="number" id="student_session_start_year"
-                                   name="student_session_start_year"
-                                   placeholder="2025" required />
-                        </div>
-
-                        <div>
-                            <label for="student_session_end_year">Session End Year</label>
-                            <input type="number" id="student_session_end_year"
-                                   name="student_session_end_year"
-                                   placeholder="2029" required />
-                        </div>
-
-                        <div>
-                            <label for="student_file">Student File (CSV / Excel)</label>
-                            <input type="file" id="student_file" name="student_file"
-                                   accept=".csv,.xlsx,.xls" required />
-                        </div>
-
-                        <div class="helper-text">
-                            Expected columns: <strong>name</strong>, <strong>email</strong>, (optional) <strong>phone</strong>.<br/>
-                            Password format: <code>Welcome@&lt;RegistrationNumber&gt;</code>.
-                        </div>
-
-                        <button type="submit" class="btn-upload">Upload Students</button>
-                    </form>
-                </div>
-
-                <!-- TEACHER UPLOAD CARD -->
-                <div class="upload-card">
-                    <h3>Upload Teachers</h3>
-                    <p>Generate Registration No and email credentials to teachers.</p>
-
-                    <form method="POST"
-                          action="{{ url_for('auth_bp.upload_teachers') }}"
-                          enctype="multipart/form-data">
-                        <div>
-                            <label for="teacher_department">Department</label>
-                            <input type="text" id="teacher_department" name="teacher_department"
-                                   placeholder="CSE / LAW / COMMERCE & MANAGEMENT" required />
-                        </div>
-
-                        <div>
-                            <label for="teacher_session_start_year">Session Start Year</label>
-                            <input type="number" id="teacher_session_start_year"
-                                   name="teacher_session_start_year"
-                                   placeholder="2025" required />
-                        </div>
-
-                        <div>
-                            <label for="teacher_session_end_year">Session End Year</label>
-                            <input type="number" id="teacher_session_end_year"
-                                   name="teacher_session_end_year"
-                                   placeholder="2029" required />
-                        </div>
-
-                        <div>
-                            <label for="teacher_file">Teacher File (CSV / Excel)</label>
-                            <input type="file" id="teacher_file" name="teacher_file"
-                                   accept=".csv,.xlsx,.xls" required />
-                        </div>
-
-                        <div class="helper-text">
-                            Expected columns: <strong>name</strong>, <strong>email</strong>, (optional) <strong>phone</strong>, (optional) <strong>designation</strong>.<br/>
-                            Password format: <code>Welcome@&lt;RegistrationNumber&gt;</code>.
-                        </div>
-
-                        <button type="submit" class="btn-upload">Upload Teachers</button>
-                    </form>
-                </div>
+            <div class="quick-actions">
+              <a href="{{ url_for('auth_bp.dict_students') }}" class="btn-chip">Manage Students</a>
+              <a href="{{ url_for('auth_bp.dict_teachers') }}" class="btn-chip">Manage Teachers</a>
+              <a href="{{ url_for('auth_bp.dict_staff') }}" class="btn-chip">Manage Employees</a>
             </div>
+          </div>
+
+          <div class="overview-side">
+            <div class="stats-row">
+              <div class="stat-card card-hover reveal-card">
+                <div class="stat-label">Total Students</div>
+                <div class="stat-value">{{ student_count }}</div>
+              </div>
+              <div class="stat-card card-hover reveal-card">
+                <div class="stat-label">Total Teachers</div>
+                <div class="stat-value">{{ teacher_count }}</div>
+              </div>
+              <div class="stat-card card-hover reveal-card">
+                <div class="stat-label">Total Staffs</div>
+                <div class="stat-value">{{ staff_count }}</div>
+              </div>
+            </div>
+            <p class="info-note">
+              Tip: Use Bulk Upload to keep data clean and consistent across all identities.
+            </p>
+          </div>
         </div>
-    </div>
-</main>
+      </section>
 
-<!-- ================= JS ================= -->
-<script>
+      <!-- ========== SECTION 2: BULK UPLOAD ========== -->
+      <section id="bulk-upload">
+        <div class="section-header">
+          <h2 class="section-title">Bulk Upload</h2>
+          <p class="section-subtitle">Upload CSV / Excel and auto-generate IDs, rolls, and credentials.</p>
+        </div>
+
+        <div class="card card-hover reveal-card">
+          <!-- FLASH MESSAGES -->
+          <div class="flash-messages">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="flash-item {{ category }} card-hover reveal-card">
+                    {{ message }}
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+          </div>
+
+          <div class="bulk-grid">
+            <!-- STUDENT UPLOAD CARD -->
+            <div class="upload-card">
+              <h3>Upload Students</h3>
+              <p>Generate Registration No, Department-wise Roll No, and email credentials.</p>
+
+              <form method="POST"
+                    action="{{ url_for('auth_bp.upload_students') }}"
+                    enctype="multipart/form-data">
+                <div>
+                  <label for="student_department">Department</label>
+                  <input type="text" id="student_department" name="student_department"
+                         placeholder="e.g. CSE" required />
+                </div>
+
+                <div>
+                  <label for="student_category">Category (optional)</label>
+                  <input type="text" id="student_category" name="student_category"
+                         placeholder="Regular / Scholarship" />
+                </div>
+
+                <div>
+                  <label for="student_label">Label (optional)</label>
+                  <input type="text" id="student_label" name="student_label"
+                         placeholder="Hostel / Day Scholar" />
+                </div>
+
+                <div>
+                  <label for="student_session_start_year">Session Start Year</label>
+                  <input type="number" id="student_session_start_year"
+                         name="student_session_start_year"
+                         placeholder="2025" required />
+                </div>
+
+                <div>
+                  <label for="student_session_end_year">Session End Year</label>
+                  <input type="number" id="student_session_end_year"
+                         name="student_session_end_year"
+                         placeholder="2029" required />
+                </div>
+
+                <div>
+                  <label for="student_file">Student File (CSV / Excel)</label>
+                  <input type="file" id="student_file" name="student_file"
+                         accept=".csv,.xlsx,.xls" required />
+                </div>
+
+                <div class="helper-text">
+                  Expected columns: <strong>name</strong>, <strong>email</strong>, (optional) <strong>phone</strong>.<br/>
+                  Password format: <code>Welcome@&lt;RegistrationNumber&gt;</code>.
+                </div>
+
+                <button type="submit" class="btn-upload">Upload Students</button>
+              </form>
+            </div>
+
+            <!-- TEACHER UPLOAD CARD -->
+            <div class="upload-card">
+              <h3>Upload Teachers</h3>
+              <p>Create teacher IDs and share login details via email.</p>
+
+              <form method="POST"
+                    action="{{ url_for('auth_bp.upload_teachers') }}"
+                    enctype="multipart/form-data">
+                <div>
+                  <label for="teacher_department">Department</label>
+                  <input type="text" id="teacher_department" name="teacher_department"
+                         placeholder="CSE / LAW / COMMERCE & MANAGEMENT" required />
+                </div>
+
+                <div>
+                  <label for="teacher_session_start_year">Session Start Year</label>
+                  <input type="number" id="teacher_session_start_year"
+                         name="teacher_session_start_year"
+                         placeholder="2025" required />
+                </div>
+
+                <div>
+                  <label for="teacher_session_end_year">Session End Year</label>
+                  <input type="number" id="teacher_session_end_year"
+                         name="teacher_session_end_year"
+                         placeholder="2029" required />
+                </div>
+
+                <div>
+                  <label for="teacher_file">Teacher File (CSV / Excel)</label>
+                  <input type="file" id="teacher_file" name="teacher_file"
+                         accept=".csv,.xlsx,.xls" required />
+                </div>
+
+                <div class="helper-text">
+                  Expected columns: <strong>name</strong>, <strong>email</strong>, (optional) <strong>phone</strong>, (optional) <strong>designation</strong>.<br/>
+                  Password format: <code>Welcome@&lt;RegistrationNumber&gt;</code>.
+                </div>
+
+                <button type="submit" class="btn-upload">Upload Teachers</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== SECTION 3: SUMMARY & REPORTS ========== -->
+      <section id="summary">
+        <div class="section-header">
+          <h2 class="section-title">Summary &amp; Reports</h2>
+          <p class="section-subtitle">Quick glance at distribution by department and roles.</p>
+        </div>
+
+        <div class="summary-grid">
+          <!-- Students summary -->
+          <div class="card summary-card card-hover reveal-card">
+            <h3>Students by Department</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Department</th>
+                  <th>Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for d in student_dept_summary %}
+                <tr>
+                  <td>{{ d._id or 'Unknown' }}</td>
+                  <td>{{ d.count }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Teachers summary -->
+          <div class="card summary-card card-hover reveal-card">
+            <h3>Teachers by Department</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Department</th>
+                  <th>Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for d in teacher_dept_summary %}
+                <tr>
+                  <td>{{ d._id or 'Unknown' }}</td>
+                  <td>{{ d.count }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Staff summary -->
+          <div class="card summary-card card-hover reveal-card">
+            <h3>Employees by Role</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Role</th>
+                  <th>Count</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for r in staff_role_summary %}
+                <tr>
+                  <td>{{ r._id or 'Unknown' }}</td>
+                  <td>{{ r.count }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== SECTION 4: DOWNLOADS ========== -->
+      <section id="downloads">
+        <div class="section-header">
+          <h2 class="section-title">Downloads</h2>
+          <p class="section-subtitle">Export current records for backup or offline processing.</p>
+        </div>
+
+        <div class="card card-hover reveal-card">
+          <div class="download-row">
+            <a href="{{ url_for('auth_bp.export_students_csv') }}" class="btn-chip">
+              Download Students CSV
+            </a>
+
+            <a href="{{ url_for('auth_bp.export_teachers_csv') }}" class="btn-chip">
+              Download Teachers CSV
+            </a>
+
+            <a href="{{ url_for('auth_bp.export_staff_csv') }}" class="btn-chip">
+              Download Staff CSV
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ================= JS ================= -->
+  <script>
+    // Theme handling
+    const THEME_KEY = "uap-theme";
+    const themeSelect = document.getElementById("themeSelect");
+    const themes = ["default", "rose", "tulip", "beach", "golden", "dark"];
+
+    function applyTheme(theme) {
+      if (!themes.includes(theme)) theme = "default";
+      document.body.classList.remove(...themes.map(t => "theme-" + t));
+      document.body.classList.add("theme-" + theme);
+      localStorage.setItem(THEME_KEY, theme);
+      if (themeSelect) themeSelect.value = theme;
+    }
+
+    const savedTheme = localStorage.getItem(THEME_KEY) || "default";
+    applyTheme(savedTheme);
+
+    if (themeSelect) {
+      themeSelect.addEventListener("change", (e) => {
+        applyTheme(e.target.value);
+      });
+    }
+
     // Preloader
     window.addEventListener("load", () => {
-        setTimeout(() => {
-            document.getElementById("preloader").style.display = "none";
-        }, 4000);
+      setTimeout(() => {
+        const pre = document.getElementById("preloader");
+        if (pre) pre.style.display = "none";
+      }, 1500);
     });
 
-    // Mobile menu
+    // Mobile menu with outside-click close
     const menuBtn = document.getElementById("menuBtn");
     const mobileMenu = document.getElementById("mobileMenu");
+    let menuOpen = false;
 
-    let open = false;
+    function setMenu(open) {
+      menuOpen = open;
+      if (menuBtn) menuBtn.textContent = open ? "✖" : "☰";
+      if (mobileMenu) mobileMenu.style.display = open ? "flex" : "none";
+    }
 
-    menuBtn.addEventListener("click", () => {
-        open = !open;
-        menuBtn.textContent = open ? "✖" : "☰";
-        mobileMenu.style.display = open ? "flex" : "none";
+    if (menuBtn && mobileMenu) {
+      menuBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        setMenu(!menuOpen);
+      });
+    }
+
+    // Close mobile menu on link/button click inside menu
+    if (mobileMenu) {
+      mobileMenu.addEventListener("click", (e) => {
+        if (e.target.tagName === "A" || e.target.tagName === "BUTTON") {
+          setMenu(false);
+        }
+      });
+    }
+
+    // Close mobile menu when clicking anywhere outside
+    document.addEventListener("click", (e) => {
+      if (!menuOpen) return;
+      if (mobileMenu && mobileMenu.contains(e.target)) return;
+      if (menuBtn && e.target === menuBtn) return;
+      setMenu(false);
     });
-</script>
 
+    // Handle BFCache back navigation
+    window.addEventListener("pageshow", function (event) {
+      if (event.persisted) {
+        window.location.reload();
+      }
+    });
+
+    // Scroll reveal for cards
+    const animatedCards = document.querySelectorAll(".reveal-card");
+
+    if ("IntersectionObserver" in window) {
+      const observer = new IntersectionObserver(
+        (entries, obs) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("visible");
+              obs.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.12 }
+      );
+
+      animatedCards.forEach((card) => observer.observe(card));
+    } else {
+      animatedCards.forEach((card) => card.classList.add("visible"));
+    }
+
+    // === Active nav link on scroll ===
+const sections = document.querySelectorAll("main section[id]");
+const navLinksAll = document.querySelectorAll(
+  '.nav-links a[href^="#"], .mobile-menu a[href^="#"]'
+);
+
+const sectionToLinks = {};
+sections.forEach((section) => {
+  const id = section.id;
+  const links = document.querySelectorAll(`a[href="#${id}"]`);
+  sectionToLinks[id] = links;
+});
+
+function clearActiveLinks() {
+  navLinksAll.forEach((link) => link.classList.remove("active"));
+}
+
+if ("IntersectionObserver" in window) {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const id = entry.target.id;
+          clearActiveLinks();
+          (sectionToLinks[id] || []).forEach((link) =>
+            link.classList.add("active")
+          );
+        }
+      });
+    },
+    {
+      root: null,
+      threshold: 0.4, // 40% of section in view
+    }
+  );
+
+  sections.forEach((section) => observer.observe(section));
+} else {
+  // Fallback for very old browsers – simple scroll handler
+  window.addEventListener("scroll", () => {
+    let currentId = null;
+    sections.forEach((section) => {
+      const rect = section.getBoundingClientRect();
+      if (rect.top <= 120 && rect.bottom >= 120) {
+        currentId = section.id;
+      }
+    });
+    if (currentId) {
+      clearActiveLinks();
+      (sectionToLinks[currentId] || []).forEach((link) =>
+        link.classList.add("active")
+      );
+    }
+  });
+}
+
+  </script>
 </body>
 </html>

@@ -1,0 +1,71 @@
+# ===============================
+#  ENVIRONMENT & SECRETS
+# ===============================
+.env
+*.env
+.env.local
+.env.production
+.env.development
+
+# Never commit SQLite database
+*.db
+*.sqlite3
+
+# ===============================
+#  PYTHON
+# ===============================
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+*.egg-info/
+*.log
+*.pid
+
+# Virtual environments
+venv/
+env/
+ENV/
+.env/
+.venv/
+
+# ===============================
+#  FLASK / BUILD
+# ===============================
+instance/
+*.sqlite
+.DS_Store
+
+# Gunicorn & Render
+*.lock
+*.pid
+
+# ===============================
+#  UPLOADS (UAP Profile Photos)
+# ===============================
+static/uploads/profiles/*
+!static/uploads/profiles/.gitkeep
+
+# ===============================
+#  EDITORS / IDE
+# ===============================
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ===============================
+#  JUPYTER / DATA
+# ===============================
+.ipynb_checkpoints/
+*.ipynb
+*.csv
+*.xlsx
+*.xls
+
+# ===============================
+#  COMPILATION OUTPUT
+# ===============================
+build/
+dist/

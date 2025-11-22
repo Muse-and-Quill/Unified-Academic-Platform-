@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add Employee – DICT</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+</head>
+<body>
+
+    <div class="bg-image"></div>
+<div class="bg-overlay"></div>
+
+<div class="container">
+    <a href="{{ url_for('auth_bp.dict_staff') }}" class="back-link">← Back to Employees</a>
+    <h1>Add Employee</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+        <div>
+            <label>Name *</label>
+            <input type="text" name="name" required>
+        </div>
+
+        <div class="row">
+            <div>
+                <label>Contact Number</label>
+                <input type="text" name="contact_number">
+            </div>
+            <div>
+                <label>Email *</label>
+                <input type="email" name="email" required>
+            </div>
+        </div>
+
+        <div class="row">
+            <div>
+                <label>Date of Birth (YYYY-MM-DD)</label>
+                <input type="text" name="dob" placeholder="1998-06-15">
+            </div>
+            <div>
+                <label>Years of Experience</label>
+                <input type="number" name="years_of_experience" min="0">
+            </div>
+        </div>
+
+        <div class="row">
+            <div>
+                <label>Role *</label>
+                <select name="role" required>
+                    <option value="">-- Select Role --</option>
+                    {% for r in roles %}
+                    <option value="{{ r }}">{{ r }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label>Date of Joining (YYYY-MM-DD)</label>
+                <input type="text" name="date_of_joining" placeholder="2024-07-01">
+            </div>
+        </div>
+
+        <div class="row">
+            <div>
+                <label>Aadhaar Number</label>
+                <input type="text" name="aadhaar_number">
+            </div>
+            <div>
+                <label>PAN Number</label>
+                <input type="text" name="pan_number">
+            </div>
+        </div>
+
+        <button type="submit" class="btn-save">Save Employee</button>
+    </form>
+</div>
+<script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+</html>

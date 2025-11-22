@@ -45,7 +45,7 @@ def generate_employee_id() -> str:
 
     next_number = 1
     while next_number in used_numbers:
-        next_number += 1
+        next_number += 3
 
     return f"DICT{next_number:03d}"
 
@@ -286,3 +286,33 @@ def create_employee_from_data(data: dict):
     print(f"TEMP DEV PASSWORD for {emp.employee_id}: {plain_password}")
 
     return emp
+
+def generate_staff_employee_number() -> str:
+    """
+    Generate next employee number for non-teaching staff in MongoDB.
+
+    Format example:
+      EMP25001, EMP25002, ...
+
+    If no previous employee exists:
+      start from EMP<YY001>, e.g. EMP25001 for year 2025.
+    """
+    db_mongo = get_mongo_db()
+    staff = db_mongo["staff"]
+
+    prefix = "EMP"
+
+    last = staff.find_one(
+        {"employee_number": {"$regex": f"^{prefix}"}},
+        sort=[("employee_number", -1)]
+    )
+
+    if not last or not str(last.get("employee_number", "")).startswith(prefix):
+        year_suffix = str(date.today().year)[-2:]   # '25' for 2025
+        start_num = int(f"{year_suffix}001")        # 25001
+        return f"{prefix}{start_num}"
+
+    emp_no = last["employee_number"]
+    numeric_part = int(emp_no[len(prefix):])
+    next_num = numeric_part + 1
+    return f"{prefix}{next_num:05d}"

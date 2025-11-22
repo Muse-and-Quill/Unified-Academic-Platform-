@@ -1,0 +1,159 @@
+/* static/css/theme.css */
+
+/* 1) Base variables */
+:root {
+  --bg-body: #f8f4ec;
+  --bg-card: rgba(255,255,255,0.9);
+  --bg-card-strong: rgba(255,255,255,0.97);
+  --nav-bg: rgba(255,255,255,0.85);
+  --nav-border: rgba(255,255,255,0.9);
+
+  --text-main: #333333;
+  --text-muted: #555555;
+  --heading-color: #540863;
+
+  --pill-bg: rgba(255,162,57,0.15);
+  --pill-text: #8a4c15;
+
+  --btn-primary-bg: #FFA239;
+  --btn-primary-bg-hover: #ff9933;
+  --btn-primary-text: #ffffff;
+
+  --btn-chip-bg: #ffffff;
+  --btn-chip-text: #444444;
+  --btn-chip-border: rgba(0,0,0,0.05);
+
+  --btn-upload-bg: #FFA239;
+  --btn-upload-bg-hover: #ff9933;
+  --btn-upload-text: #ffffff;
+
+  --stat-card-bg: #ffffff;
+  --stat-card-border: rgba(0,0,0,0.05);
+
+  --summary-card-bg: #ffffff;
+  --summary-card-border: rgba(0,0,0,0.05);
+
+  --link-accent: #427A76;
+
+  --bg-grad-1: rgba(248,244,236,0.6);
+  --bg-grad-2: rgba(255,162,57,0.3);
+}
+
+/* 2) Theme variants: rose, tulip, beach, golden, dark */
+/* (same content you already have, just moved here) */
+
+body.theme-rose {
+  --bg-body: #fff1f6;
+  --bg-card: rgba(255,255,255,0.92);
+  --bg-card-strong: rgba(255,255,255,0.98);
+  --nav-bg: rgba(255, 240, 247, 0.95);
+  --nav-border: rgba(255, 255, 255, 0.9);
+
+  --text-main: #3a2433;
+  --text-muted: #6b5061;
+  --heading-color: #b31263;
+
+  --pill-bg: rgba(255,182,193,0.3);
+  --pill-text: #8f184d;
+
+  --btn-primary-bg: #ff5c8a;
+  --btn-primary-bg-hover: #ff3d76;
+  --btn-primary-text: #fff;
+
+  --btn-chip-bg: #ffe4ee;
+  --btn-chip-text: #7b3054;
+  --btn-chip-border: rgba(255,105,180,0.4);
+
+  --btn-upload-bg: #ff5c8a;
+  --btn-upload-bg-hover: #ff3d76;
+  --btn-upload-text: #fff;
+
+  --stat-card-bg: #fff5fa;
+  --stat-card-border: rgba(255,105,180,0.25);
+
+  --summary-card-bg: #fff5fa;
+  --summary-card-border: rgba(255,105,180,0.25);
+
+  --link-accent: #b31263;
+
+  --bg-grad-1: rgba(255,228,235,0.7);
+  --bg-grad-2: rgba(255,105,180,0.35);
+}
+
+body.theme-tulip {
+  --bg-body: #fdf3e4;
+  --bg-card: rgba(255,255,255,0.94);
+  --bg-card-strong: rgba(255,255,255,0.99);
+  --nav-bg: rgba(255,246,234,0.95);
+  --nav-border: rgba(255,255,255,0.9);
+
+  --text-main: #3c2413;
+  --text-muted: #6b4a2d;
+  --heading-color: #c4511f;
+
+  --pill-bg: rgba(255,171,92,0.25);
+  --pill-text: #9b3b12;
+
+  --btn-primary-bg: #ff8a3d;
+  --btn-primary-bg-hover: #ff6d1b;
+  --btn-primary-text: #fff;
+
+  --btn-chip-bg: #ffe4c7;
+  --btn-chip-text: #7b3f16;
+  --btn-chip-border: rgba(255,165,92,0.5);
+
+  --btn-upload-bg: #ff8a3d;
+  --btn-upload-bg-hover: #ff6d1b;
+  --btn-upload-text: #fff;
+
+  --stat-card-bg: #fff8ee;
+  --stat-card-border: rgba(255,165,92,0.35);
+
+  --summary-card-bg: #fff8ee;
+  --summary-card-border: rgba(255,165,92,0.35);
+
+  --link-accent: #c4511f;
+
+  --bg-grad-1: rgba(255,239,213,0.75);
+  --bg-grad-2: rgba(255,140,0,0.35);
+}
+
+/* ... beach, golden, dark – same as you already wrote ... */
+
+body.theme-dark {
+  --bg-body: #050712;
+  --bg-card: rgba(15,17,32,0.96);
+  --bg-card-strong: rgba(15,17,32,1);
+  --nav-bg: rgba(10,12,25,0.96);
+  --nav-border: rgba(148,163,184,0.5);
+
+  --text-main: #e5e7eb;
+  --text-muted: #9ca3af;
+  --heading-color: goldenrod;
+
+  --pill-bg: rgba(252,211,77,0.15);
+  --pill-text: goldenrod;
+
+  --btn-primary-bg: #111827;
+  --btn-primary-bg-hover: #020617;
+  --btn-primary-text: skyblue;
+
+  --btn-chip-bg: #020617;
+  --btn-chip-text: #f6005a;
+  --btn-chip-border: rgba(148,163,184,0.7);
+
+  --btn-upload-bg: #111827;
+  --btn-upload-bg-hover: #020617;
+  --btn-upload-text: #fca5a5;
+
+  --stat-card-bg: rgba(15,23,42,1);
+  --stat-card-border: rgba(148,163,184,0.5);
+
+  --summary-card-bg: rgba(15,23,42,1);
+  --summary-card-border: rgba(148,163,184,0.5);
+
+  --link-accent: skyblue;
+
+  --bg-grad-1: rgba(15,23,42,0.9);
+  --bg-grad-2: rgba(2,6,23,0.95);
+}

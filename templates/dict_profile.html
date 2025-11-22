@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DICT Profile – UAP</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+
+
+</head>
+<body>
+          <div class="bg-image"></div>
+
+  <div class="bg-overlay"></div>
+ 
+<div class="container">
+    <a href="{{ url_for('auth_bp.dict_dashboard') }}" class="back-link">← Back to DICT Dashboard</a>
+
+    <h1>My Profile</h1>
+    <div class="subtitle">View and update your DICT employee details.</div>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="profile-top">
+ 
+
+        <div class="avatar-wrapper">
+            {% if emp.profile_photo %}
+                <img src="/{{ emp.profile_photo }}" alt="Profile Photo">
+            {% else %}
+                {{ emp.name[0] if emp.name }}
+            {% endif %}
+        </div>
+        <div class="basic-info">
+            <p><strong>{{ emp.name }}</strong></p>
+            <p>Employee ID: <strong>{{ emp.employee_id }}</strong></p>
+            <p>Email: {{ emp.email }}</p>
+            <p>Department: {{ emp.department or "DICT" }}</p>
+            <span class="tag">Help & Support Department (DICT)</span>
+        </div>
+    </div>
+
+    <h2>Profile Details</h2>
+
+    <form method="POST" enctype="multipart/form-data" id="profileForm">
+        <div class="row">
+            <div>
+                <label for="name">Full Name</label>
+                <input id="name" name="name" type="text" value="{{ emp.name }}" disabled class="readonly">
+            </div>
+            <div>
+                <label for="contact_number">Contact Number</label>
+                <input id="contact_number" name="contact_number" type="text" value="{{ emp.contact_number or '' }}" disabled class="readonly">
+            </div>
+        </div>
+
+        <div>
+            <label for="address">Address</label>
+            <textarea id="address" name="address" disabled class="readonly">{{ emp.address or '' }}</textarea>
+        </div>
+
+        <div>
+            <label for="profile_photo">Profile Photo</label>
+            <input id="profile_photo" name="profile_photo" type="file" accept="image/*" disabled class="readonly">
+            <small style="display:block; font-size:12px; color:#777; margin-top:3px;">
+                Recommended: square image, JPG/PNG, less than 2 MB.
+            </small>
+        </div>
+
+        <div class="btn-row">
+            <!-- By default only EDIT is visible -->
+            <button type="button" id="editBtn" class="btn btn-save" style="color: var(--btn-primary-text);">Edit</button>
+            <button type="submit" id="saveBtn" class="btn btn-save" style="display:none;">Save</button>
+            <button type="button" id="cancelBtn" class="btn btn-cancel" style="display:none;">Cancel</button>
+        </div>
+    </form>
+</div>
+
+<script>
+    const editBtn = document.getElementById("editBtn");
+    const saveBtn = document.getElementById("saveBtn");
+    const cancelBtn = document.getElementById("cancelBtn");
+    const form = document.getElementById("profileForm");
+
+    const editableFields = [
+        document.getElementById("name"),
+        document.getElementById("contact_number"),
+        document.getElementById("address"),
+        document.getElementById("profile_photo"),
+    ];
+
+    // Store initial values to restore on cancel
+    const initialValues = {};
+    editableFields.forEach(field => {
+        if (field.tagName === "TEXTAREA" || field.tagName === "INPUT") {
+            initialValues[field.id] = field.value;
+        }
+    });
+
+    function setEditMode(isEditing) {
+        editableFields.forEach(field => {
+            field.disabled = !isEditing;
+            if (isEditing) {
+                field.classList.remove("readonly");
+            } else {
+                field.classList.add("readonly");
+            }
+        });
+        editBtn.style.display = isEditing ? "none" : "inline-block";
+        saveBtn.style.display = isEditing ? "inline-block" : "none";
+        cancelBtn.style.display = isEditing ? "inline-block" : "none";
+    }
+
+    editBtn.addEventListener("click", () => {
+        setEditMode(true);
+    });
+
+    cancelBtn.addEventListener("click", () => {
+        // Restore initial values
+        editableFields.forEach(field => {
+            if (field.tagName === "TEXTAREA" || field.tagName === "INPUT") {
+                if (field.type !== "file") {
+                    field.value = initialValues[field.id] || "";
+                } else {
+                    field.value = "";  // clear file input
+                }
+            }
+        });
+        setEditMode(false);
+    });
+
+    // On page load → view mode
+    setEditMode(false);
+</script>
+<script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+
+</body>
+</html>
