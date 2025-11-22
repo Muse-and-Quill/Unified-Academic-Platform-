@@ -536,17 +536,25 @@
     margin-top: 6px;
   }
 
-  @media (max-width: 768px) {
-    .nav-links {
-      display: none;
-    }
-    .menu-btn {
-      display: block;
-    }
-    .theme-select {
-      display: none; /* keep navbar compact on small screens */
-    }
+ @media (max-width: 768px) {
+  .nav-links {
+    display: none;
   }
+  .menu-btn {
+    display: block;
+  }
+
+  /* Hide ONLY the desktop theme selector in the navbar */
+  .nav-right .theme-select {
+    display: none;
+  }
+
+  /* Make sure theme selector inside mobile menu is visible */
+  .mobile-menu .theme-select {
+    display: block;
+  }
+}
+
 
   /* ================= LAYOUT SECTIONS ================= */
   .content {

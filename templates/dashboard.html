@@ -43,7 +43,7 @@ body.theme-dark .btn-chip:hover {
     <!-- NAVBAR -->
     <nav class="navbar">
       <div class="nav-container">
-        <a href="/" class="logo-link">
+        <a class="logo-link">
           <img src="{{ url_for('static', filename='images/uap-logo.png') }}" alt="UAP Logo" class="logo">
         </a>
 
@@ -74,7 +74,8 @@ body.theme-dark .btn-chip:hover {
           </div>
 
           <!-- Theme selector -->
-          <select id="themeSelect" class="theme-select" aria-label="Select theme">
+           
+<select id="themeSelectDesktop" class="theme-select" aria-label="Select theme">
 
             <option value="default">Default</option>
             <option value="rose">Rose</option>
@@ -94,7 +95,15 @@ body.theme-dark .btn-chip:hover {
         <a href="#bulk-upload">Upload</a>
         <a href="#summary">Summary</a>
         <a href="#downloads">Downloads</a>
+<select id="themeSelectMobile" class="theme-select" aria-label="Select theme">
 
+            <option value="default">Default</option>
+            <option value="rose">Rose</option>
+            <option value="tulip">Tulip</option>
+            <option value="beach">Beach</option>
+            <option value="golden">Golden</option>
+            <option value="dark">Dark Mode</option>
+          </select>
         <a href="{{ url_for('auth_bp.dict_contact_requests') }}">Contact Requests</a>
         <a href="{{ url_for('auth_bp.dict_profile') }}">My Profile</a>
         <a href="{{ url_for('auth_bp.logout') }}">
@@ -375,26 +384,45 @@ body.theme-dark .btn-chip:hover {
   <!-- ================= JS ================= -->
   <script>
     // Theme handling
-    const THEME_KEY = "uap-theme";
-    const themeSelect = document.getElementById("themeSelect");
-    const themes = ["default", "rose", "tulip", "beach", "golden", "dark"];
+const THEME_KEY = "uap-theme";
+const themes = ["default", "rose", "tulip", "beach", "golden", "dark"];
 
-    function applyTheme(theme) {
-      if (!themes.includes(theme)) theme = "default";
-      document.body.classList.remove(...themes.map(t => "theme-" + t));
-      document.body.classList.add("theme-" + theme);
-      localStorage.setItem(THEME_KEY, theme);
-      if (themeSelect) themeSelect.value = theme;
-    }
+const themeSelectDesktop = document.getElementById("themeSelectDesktop");
+const themeSelectMobile  = document.getElementById("themeSelectMobile");
 
-    const savedTheme = localStorage.getItem(THEME_KEY) || "default";
-    applyTheme(savedTheme);
+function applyTheme(theme) {
+  if (!themes.includes(theme)) theme = "default";
 
-    if (themeSelect) {
-      themeSelect.addEventListener("change", (e) => {
-        applyTheme(e.target.value);
-      });
-    }
+  // remove previous theme classes
+  document.body.classList.remove(...themes.map(t => "theme-" + t));
+  // add new theme class
+  document.body.classList.add("theme-" + theme);
+
+  // remember choice
+  localStorage.setItem(THEME_KEY, theme);
+
+  // keep both dropdowns in sync
+  if (themeSelectDesktop) themeSelectDesktop.value = theme;
+  if (themeSelectMobile)  themeSelectMobile.value  = theme;
+}
+
+// initial load
+const savedTheme = localStorage.getItem(THEME_KEY) || "default";
+applyTheme(savedTheme);
+
+// desktop selector listener
+if (themeSelectDesktop) {
+  themeSelectDesktop.addEventListener("change", (e) => {
+    applyTheme(e.target.value);
+  });
+}
+
+// mobile selector listener
+if (themeSelectMobile) {
+  themeSelectMobile.addEventListener("change", (e) => {
+    applyTheme(e.target.value);
+  });
+}
 
     // Preloader
     window.addEventListener("load", () => {
