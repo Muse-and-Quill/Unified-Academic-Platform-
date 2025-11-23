@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DICT – Employees Recycle Bin</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
+
+<style>
+/* Wrapper to allow horizontal scroll if needed */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* Make recycle table a bit wider on desktop */
+.recycle-table table {
+  min-width: 780px;
+}
+
+/* Small meta pill under deleted info */
+.badge-meta {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  background: rgba(148, 163, 184, 0.15);
+  color: #4b5563;
+  margin-top: 3px;
+}
+
+body.theme-dark .badge-meta {
+  background: rgba(148, 163, 184, 0.25);
+  color: var(--text-main);
+}
+
+/* Restore button (success) */
+.btn-restore-selected {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: none;
+  background: #22c55e;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+  transition: 0.2s ease;
+}
+
+.btn-restore-selected:hover {
+  background: #16a34a;
+  transform: translateY(-1px);
+}
+
+body.theme-dark .btn-restore-selected {
+  box-shadow: 0 5px 14px rgba(0,0,0,0.55);
+}
+
+/* Top bar search */
+.top-bar {
+  margin-top: 12px;
+  margin-bottom: 6px;
+}
+
+.search-form {
+  width: 100%;
+}
+
+.search-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.search-row input[type="text"] {
+  flex: 1;
+  min-width: 200px;
+}
+
+/* Mobile: turn table into stacked cards */
+@media (max-width: 720px) {
+  .recycle-table table,
+  .recycle-table thead,
+  .recycle-table tbody,
+  .recycle-table th,
+  .recycle-table td,
+  .recycle-table tr {
+    display: block;
+    width: 100%;
+  }
+
+  .recycle-table thead {
+    display: none;
+  }
+
+  .recycle-table tr {
+    margin-bottom: 10px;
+    border-radius: 12px;
+    padding: 8px 10px;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+
+  body.theme-dark .recycle-table tr {
+    background: var(--bg-card);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.55);
+  }
+
+  .recycle-table td {
+    border: none;
+    padding: 6px 0;
+    position: relative;
+    font-size: 13px;
+  }
+
+  .recycle-table td::before {
+    content: attr(data-label);
+    display: block;
+    font-weight: 600;
+    margin-bottom: 2px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--text-muted);
+  }
+
+  .recycle-table .small-text {
+    font-size: 12px;
+  }
+}
+</style>
+</head>
+<body class="theme-default">
+
+<div class="bg-image"></div>
+<div class="bg-overlay"></div>
+
+<div class="page">
+  <div class="container">
+    <a href="{{ url_for('auth_bp.dict_staff') }}" class="back-link">← Back to Manage Employees</a>
+
+    <h1>Employees Recycle Bin</h1>
+    <div class="subtitle">
+      Restore accidentally deleted non-teaching staff records from here.
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="summary">
+      Total archived employees: <strong>{{ total }}</strong>
+      {% if total_pages > 1 %}
+        • Page {{ page }} of {{ total_pages }}
+      {% endif %}
+    </div>
+
+    <div class="top-bar">
+      <form method="GET" class="search-form">
+        <div class="search-row">
+          <input type="text"
+                 id="recycleStaffSearch"
+                 name="q"
+                 placeholder="Search by Emp No, Name, Email, Role or Contact"
+                 value="{{ search_query or '' }}">
+          <button type="submit" class="btn-primary">Search</button>
+        </div>
+      </form>
+    </div>
+
+    {% if deleted_staff %}
+      <form method="POST"
+            action="{{ url_for('auth_bp.restore_selected_staff') }}"
+            id="restoreSelectedStaffForm">
+
+        <div class="table-responsive recycle-table">
+          <table>
+            <thead>
+              <tr>
+                <th><input type="checkbox" id="selectAllDeletedStaff"></th>
+                <th>Emp No</th>
+                <th>Name &amp; Email</th>
+                <th>Role / Contact</th>
+                <th>Deleted Info</th>
+              </tr>
+            </thead>
+            <tbody id="deletedStaffTableBody">
+              {% for s in deleted_staff %}
+              <tr>
+                <td data-label="Select">
+                  <input type="checkbox" name="selected_ids" value="{{ s._id }}">
+                </td>
+                <td data-label="Emp No">
+                  {{ s.employee_number }}
+                </td>
+                <td data-label="Name &amp; Email">
+                  <strong>{{ s.name }}</strong><br>
+                  <span class="small-text">{{ s.email }}</span>
+                </td>
+                <td data-label="Role / Contact">
+                  {{ s.role or '-' }}<br>
+                  <span class="small-text">{{ s.contact_number or '-' }}</span>
+                </td>
+                <td data-label="Deleted Info">
+                  <span class="small-text">
+                    Deleted at:
+                    {% if s.deleted_at %}
+                      {{ s.deleted_at.strftime("%d-%m-%Y %H:%M") if s.deleted_at.__class__.__name__ == 'datetime' else s.deleted_at }}
+                    {% else %}
+                      -
+                    {% endif %}
+                  </span><br>
+                  <span class="badge-meta">
+                    by {{ s.deleted_by or 'system' }}
+                  </span>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div style="margin-top: 10px;">
+          <button type="submit"
+                  class="btn-restore-selected"
+                  onclick="return confirm('Restore all selected employees back to active records?');">
+            Restore Selected Employees
+          </button>
+        </div>
+      </form>
+    {% else %}
+      <p class="empty-state" style="margin-top: 10px;">
+        No deleted employees in archive.
+      </p>
+    {% endif %}
+
+    {% if total_pages > 1 %}
+      <div class="pagination">
+        {% if page > 1 %}
+          <a href="{{ url_for('auth_bp.dict_staff_recycle_bin',
+                              page=page-1,
+                              q=search_query or '') }}">Prev</a>
+        {% endif %}
+        {% for p in range(1, total_pages + 1) %}
+          {% if p == page %}
+            <span class="current">{{ p }}</span>
+          {% else %}
+            <a href="{{ url_for('auth_bp.dict_staff_recycle_bin',
+                                page=p,
+                                q=search_query or '') }}">{{ p }}</a>
+          {% endif %}
+        {% endfor %}
+        {% if page < total_pages %}
+          <a href="{{ url_for('auth_bp.dict_staff_recycle_bin',
+                              page=page+1,
+                              q=search_query or '') }}">Next</a>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+
+<script>
+  const recycleStaffSearch = document.getElementById("recycleStaffSearch");
+  const deletedStaffRows = document.querySelectorAll("#deletedStaffTableBody tr");
+
+  if (recycleStaffSearch && deletedStaffRows.length > 0) {
+    recycleStaffSearch.addEventListener("input", function () {
+      const term = this.value.toLowerCase();
+      deletedStaffRows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(term) ? "" : "none";
+      });
+    });
+  }
+
+  const selectAllDeletedStaff = document.getElementById("selectAllDeletedStaff");
+  const deletedStaffCheckboxes = document.querySelectorAll('input[name="selected_ids"]');
+
+  if (selectAllDeletedStaff && deletedStaffCheckboxes.length > 0) {
+    selectAllDeletedStaff.addEventListener("change", function () {
+      deletedStaffCheckboxes.forEach(cb => cb.checked = selectAllDeletedStaff.checked);
+    });
+  }
+</script>
+
+</body>
+</html>

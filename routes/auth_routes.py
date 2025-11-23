@@ -10,6 +10,11 @@ from bson.objectid import ObjectId
 import csv
 from io import StringIO
 from flask import Response
+from datetime import datetime
+from bson import ObjectId
+from flask import current_app
+
+from utils.mongo_client import get_mongo_db
 
 
 from utils.helpers import (
@@ -87,6 +92,32 @@ def login():
     # Redirect to DICT / HSD dashboard
     return redirect(url_for("auth_bp.dict_dashboard"))
 
+def archive_documents(collection_name: str, docs: list, deleted_by: str | None = None):
+    """
+    Move copies of docs into <collection_name>_deleted archive.
+    Does NOT delete from the original collection; caller will do that.
+    Adds deleted_at + deleted_by fields.
+    """
+    if not docs:
+        return
+
+    db_mongo = get_mongo_db()
+    archive_collection_name = f"{collection_name}_deleted"
+    archive_collection = db_mongo[archive_collection_name]
+
+    now = datetime.utcnow()
+    employee_id = deleted_by or "system"
+
+    # clone docs and add metadata
+    archive_docs = []
+    for d in docs:
+        # ensure we create a shallow copy
+        doc_copy = dict(d)
+        doc_copy["deleted_at"] = now
+        doc_copy["deleted_by"] = employee_id
+        archive_docs.append(doc_copy)
+
+    archive_collection.insert_many(archive_docs)
 
 @auth_bp.route("/logout")
 def logout():
@@ -1812,40 +1843,8 @@ def delete_all_contact_requests():
     flash(f"Deleted {result.deleted_count} contact requests.", "success")
     return redirect(url_for("auth_bp.dict_contact_requests"))
 
-@auth_bp.route("/dict/students/delete-selected", methods=["POST"])
-def delete_selected_students():
-    if session.get("user_role") != "hsd":
-        return redirect(url_for("auth_bp.login"))
-
-    db_mongo = get_mongo_db()
-    students_collection = db_mongo["students"]
-
-    selected_ids = request.form.getlist("selected_ids")
-    if not selected_ids:
-        flash("No students selected for deletion.", "error")
-        return redirect(url_for("auth_bp.dict_students"))
-
-    object_ids = []
-    for sid in selected_ids:
-        try:
-            object_ids.append(ObjectId(sid))
-        except Exception:
-            continue
-
-    if not object_ids:
-        flash("No valid student IDs selected.", "error")
-        return redirect(url_for("auth_bp.dict_students"))
-
-    result = students_collection.delete_many({"_id": {"$in": object_ids}})
-    flash(f"Deleted {result.deleted_count} students.", "success")
-    return redirect(url_for("auth_bp.dict_students"))
-
 @auth_bp.route("/dict/students/delete-filtered", methods=["POST"])
 def delete_filtered_students():
-    """
-    Deletes ALL students matching the current filter (search + date range).
-    Use this if a wrong Excel upload was done for a specific department/date.
-    """
     if session.get("user_role") != "hsd":
         return redirect(url_for("auth_bp.login"))
 
@@ -1873,6 +1872,7 @@ def delete_filtered_students():
             date_range["$gte"] = datetime.strptime(from_date_str, "%Y-%m-%d")
         except ValueError:
             pass
+
     if to_date_str:
         try:
             dt = datetime.strptime(to_date_str, "%Y-%m-%d")
@@ -1889,13 +1889,54 @@ def delete_filtered_students():
         flash("No filter applied. Please use search or date range before bulk delete.", "error")
         return redirect(url_for("auth_bp.dict_students"))
 
-    count = students_collection.count_documents(query)
-    if count == 0:
+    # 1) Fetch docs to be deleted
+    docs_to_delete = list(students_collection.find(query))
+    if not docs_to_delete:
         flash("No students matched the filter to delete.", "error")
         return redirect(url_for("auth_bp.dict_students"))
 
+    # 2) Archive a copy
+    deleted_by = session.get("employee_id") or "hsd"
+    archive_documents("students", docs_to_delete, deleted_by=deleted_by)
+
+    # 3) Now safely delete from main collection
     result = students_collection.delete_many(query)
-    flash(f"Deleted {result.deleted_count} students matching the filter.", "success")
+    flash(f"Deleted {result.deleted_count} students matching the filter (archived for recovery).", "success")
+    return redirect(url_for("auth_bp.dict_students"))
+
+@auth_bp.route("/dict/students/delete-selected", methods=["POST"])
+def delete_selected_students():
+    if session.get("user_role") != "hsd":
+        return redirect(url_for("auth_bp.login"))
+
+    db_mongo = get_mongo_db()
+    students_collection = db_mongo["students"]
+
+    selected_ids = request.form.getlist("selected_ids")
+    if not selected_ids:
+        flash("No students selected for deletion.", "error")
+        return redirect(url_for("auth_bp.dict_students"))
+
+    object_ids = []
+    for sid in selected_ids:
+        try:
+            object_ids.append(ObjectId(sid))
+        except Exception:
+            continue
+
+    if not object_ids:
+        flash("No valid student IDs selected.", "error")
+        return redirect(url_for("auth_bp.dict_students"))
+
+    # 1) Fetch docs to archive
+    docs_to_delete = list(students_collection.find({"_id": {"$in": object_ids}}))
+    if docs_to_delete:
+        deleted_by = session.get("employee_id") or "hsd"
+        archive_documents("students", docs_to_delete, deleted_by=deleted_by)
+
+    # 2) Delete from main
+    result = students_collection.delete_many({"_id": {"$in": object_ids}})
+    flash(f"Deleted {result.deleted_count} students (archived for recovery).", "success")
     return redirect(url_for("auth_bp.dict_students"))
 
 @auth_bp.route("/dict/teachers/delete-selected", methods=["POST"])
@@ -1922,8 +1963,15 @@ def delete_selected_teachers():
         flash("No valid teacher IDs selected.", "error")
         return redirect(url_for("auth_bp.dict_teachers"))
 
+    # 1) Fetch docs to archive
+    docs_to_delete = list(teachers_collection.find({"_id": {"$in": object_ids}}))
+    if docs_to_delete:
+        deleted_by = session.get("employee_id") or "hsd"
+        archive_documents("teachers", docs_to_delete, deleted_by=deleted_by)
+
+    # 2) Delete from main collection
     result = teachers_collection.delete_many({"_id": {"$in": object_ids}})
-    flash(f"Deleted {result.deleted_count} teachers.", "success")
+    flash(f"Deleted {result.deleted_count} teachers (archived for recovery).", "success")
     return redirect(url_for("auth_bp.dict_teachers"))
 
 @auth_bp.route("/dict/teachers/delete-filtered", methods=["POST"])
@@ -1971,13 +2019,19 @@ def delete_filtered_teachers():
         flash("No filter applied. Please use search or date range before bulk delete.", "error")
         return redirect(url_for("auth_bp.dict_teachers"))
 
-    count = teachers_collection.count_documents(query)
-    if count == 0:
+    # 1) Fetch docs to be deleted
+    docs_to_delete = list(teachers_collection.find(query))
+    if not docs_to_delete:
         flash("No teachers matched the filter to delete.", "error")
         return redirect(url_for("auth_bp.dict_teachers"))
 
+    # 2) Archive a copy
+    deleted_by = session.get("employee_id") or "hsd"
+    archive_documents("teachers", docs_to_delete, deleted_by=deleted_by)
+
+    # 3) Delete from main
     result = teachers_collection.delete_many(query)
-    flash(f"Deleted {result.deleted_count} teachers matching the filter.", "success")
+    flash(f"Deleted {result.deleted_count} teachers matching the filter (archived for recovery).", "success")
     return redirect(url_for("auth_bp.dict_teachers"))
 
 @auth_bp.route("/dict/staff/delete-selected", methods=["POST"])
@@ -2004,8 +2058,15 @@ def delete_selected_staff():
         flash("No valid employee IDs selected.", "error")
         return redirect(url_for("auth_bp.dict_staff"))
 
+    # 1) Fetch docs to archive
+    docs_to_delete = list(staff_collection.find({"_id": {"$in": object_ids}}))
+    if docs_to_delete:
+        deleted_by = session.get("employee_id") or "hsd"
+        archive_documents("staff", docs_to_delete, deleted_by=deleted_by)
+
+    # 2) Delete from main
     result = staff_collection.delete_many({"_id": {"$in": object_ids}})
-    flash(f"Deleted {result.deleted_count} employees.", "success")
+    flash(f"Deleted {result.deleted_count} employees (archived for recovery).", "success")
     return redirect(url_for("auth_bp.dict_staff"))
 
 @auth_bp.route("/dict/staff/delete-filtered", methods=["POST"])
@@ -2053,11 +2114,319 @@ def delete_filtered_staff():
         flash("No filter applied. Please use search or date range before bulk delete.", "error")
         return redirect(url_for("auth_bp.dict_staff"))
 
-    count = staff_collection.count_documents(query)
-    if count == 0:
+    # 1) Fetch docs to delete
+    docs_to_delete = list(staff_collection.find(query))
+    if not docs_to_delete:
         flash("No employees matched the filter to delete.", "error")
         return redirect(url_for("auth_bp.dict_staff"))
 
+    # 2) Archive
+    deleted_by = session.get("employee_id") or "hsd"
+    archive_documents("staff", docs_to_delete, deleted_by=deleted_by)
+
+    # 3) Delete
     result = staff_collection.delete_many(query)
-    flash(f"Deleted {result.deleted_count} employees matching the filter.", "success")
+    flash(f"Deleted {result.deleted_count} employees matching the filter (archived for recovery).", "success")
     return redirect(url_for("auth_bp.dict_staff"))
+
+@auth_bp.route("/dict/students/recycle-bin")
+def dict_students_recycle_bin():
+    if session.get("user_role") != "hsd":
+        return redirect(url_for("auth_bp.login"))
+
+    db_mongo = get_mongo_db()
+    archive_collection = db_mongo["students_deleted"]
+
+    # Search & pagination
+    q = request.args.get("q", "").strip()
+    page = int(request.args.get("page", 1))
+    per_page = 30
+    skip = (page - 1) * per_page
+
+    mongo_query = {}
+
+    if q:
+        mongo_query = {
+            "$or": [
+                {"registration_number": {"$regex": q, "$options": "i"}},
+                {"roll_number": {"$regex": q, "$options": "i"}},
+                {"name": {"$regex": q, "$options": "i"}},
+                {"email": {"$regex": q, "$options": "i"}},
+                {"department": {"$regex": q, "$options": "i"}},
+            ]
+        }
+
+    total = archive_collection.count_documents(mongo_query)
+    cursor = (
+        archive_collection.find(mongo_query)
+        .sort("deleted_at", -1)
+        .skip(skip)
+        .limit(per_page)
+    )
+
+    deleted_students = []
+    for d in cursor:
+        d["_id"] = str(d["_id"])
+        deleted_students.append(d)
+
+    total_pages = (total + per_page - 1) // per_page
+
+    return render_template(
+        "dict_students_recycle_bin.html",
+        deleted_students=deleted_students,
+        page=page,
+        total_pages=total_pages,
+        total=total,
+        search_query=q,
+    )
+
+@auth_bp.route("/dict/students/restore-selected", methods=["POST"])
+def restore_selected_students():
+    if session.get("user_role") != "hsd":
+        return redirect(url_for("auth_bp.login"))
+
+    db_mongo = get_mongo_db()
+    archive_collection = db_mongo["students_deleted"]
+    students_collection = db_mongo["students"]
+
+    selected_ids = request.form.getlist("selected_ids")
+    if not selected_ids:
+        flash("No students selected for restore.", "error")
+        return redirect(url_for("auth_bp.dict_students_recycle_bin"))
+
+    object_ids = []
+    for sid in selected_ids:
+        try:
+            object_ids.append(ObjectId(sid))
+        except Exception:
+            continue
+
+    if not object_ids:
+        flash("No valid archived student IDs selected.", "error")
+        return redirect(url_for("auth_bp.dict_students_recycle_bin"))
+
+    # Fetch archived docs
+    docs = list(archive_collection.find({"_id": {"$in": object_ids}}))
+    if not docs:
+        flash("Selected archived students not found.", "error")
+        return redirect(url_for("auth_bp.dict_students_recycle_bin"))
+
+    restored_count = 0
+
+    for doc in docs:
+        archive_id = doc["_id"]
+
+        # remove archive-specific metadata
+        doc.pop("deleted_at", None)
+        doc.pop("deleted_by", None)
+
+        # ensure _id is unique in main collection
+        existing = students_collection.find_one({"_id": doc["_id"]})
+        if existing:
+            # If conflict, drop _id so Mongo assigns a new one
+            doc.pop("_id", None)
+
+        students_collection.insert_one(doc)
+        archive_collection.delete_one({"_id": archive_id})
+        restored_count += 1
+
+    flash(f"Restored {restored_count} students from archive.", "success")
+    return redirect(url_for("auth_bp.dict_students_recycle_bin"))
+
+@auth_bp.route("/dict/teachers/recycle-bin")
+def dict_teachers_recycle_bin():
+    if session.get("user_role") != "hsd":
+        return redirect(url_for("auth_bp.login"))
+
+    db_mongo = get_mongo_db()
+    archive_collection = db_mongo["teachers_deleted"]
+
+    q = request.args.get("q", "").strip()
+    page = int(request.args.get("page", 1))
+    per_page = 30
+    skip = (page - 1) * per_page
+
+    mongo_query = {}
+
+    if q:
+        mongo_query = {
+            "$or": [
+                {"registration_number": {"$regex": q, "$options": "i"}},
+                {"name": {"$regex": q, "$options": "i"}},
+                {"email": {"$regex": q, "$options": "i"}},
+                {"department": {"$regex": q, "$options": "i"}},
+                {"designation": {"$regex": q, "$options": "i"}},
+            ]
+        }
+
+    total = archive_collection.count_documents(mongo_query)
+    cursor = (
+        archive_collection.find(mongo_query)
+        .sort("deleted_at", -1)
+        .skip(skip)
+        .limit(per_page)
+    )
+
+    deleted_teachers = []
+    for d in cursor:
+        d["_id"] = str(d["_id"])
+        deleted_teachers.append(d)
+
+    total_pages = (total + per_page - 1) // per_page
+
+    return render_template(
+        "dict_teachers_recycle_bin.html",
+        deleted_teachers=deleted_teachers,
+        page=page,
+        total_pages=total_pages,
+        total=total,
+        search_query=q,
+    )
+
+@auth_bp.route("/dict/teachers/restore-selected", methods=["POST"])
+def restore_selected_teachers():
+    if session.get("user_role") != "hsd":
+        return redirect(url_for("auth_bp.login"))
+
+    db_mongo = get_mongo_db()
+    archive_collection = db_mongo["teachers_deleted"]
+    teachers_collection = db_mongo["teachers"]
+
+    selected_ids = request.form.getlist("selected_ids")
+    if not selected_ids:
+        flash("No teachers selected for restore.", "error")
+        return redirect(url_for("auth_bp.dict_teachers_recycle_bin"))
+
+    object_ids = []
+    for tid in selected_ids:
+        try:
+            object_ids.append(ObjectId(tid))
+        except Exception:
+            continue
+
+    if not object_ids:
+        flash("No valid archived teacher IDs selected.", "error")
+        return redirect(url_for("auth_bp.dict_teachers_recycle_bin"))
+
+    docs = list(archive_collection.find({"_id": {"$in": object_ids}}))
+    if not docs:
+        flash("Selected archived teachers not found.", "error")
+        return redirect(url_for("auth_bp.dict_teachers_recycle_bin"))
+
+    restored_count = 0
+
+    for doc in docs:
+        archive_id = doc["_id"]
+
+        doc.pop("deleted_at", None)
+        doc.pop("deleted_by", None)
+
+        existing = teachers_collection.find_one({"_id": doc["_id"]})
+        if existing:
+            doc.pop("_id", None)
+
+        teachers_collection.insert_one(doc)
+        archive_collection.delete_one({"_id": archive_id})
+        restored_count += 1
+
+    flash(f"Restored {restored_count} teachers from archive.", "success")
+    return redirect(url_for("auth_bp.dict_teachers_recycle_bin"))
+
+@auth_bp.route("/dict/staff/recycle-bin")
+def dict_staff_recycle_bin():
+    if session.get("user_role") != "hsd":
+        return redirect(url_for("auth_bp.login"))
+
+    db_mongo = get_mongo_db()
+    archive_collection = db_mongo["staff_deleted"]
+
+    q = request.args.get("q", "").strip()
+    page = int(request.args.get("page", 1))
+    per_page = 30
+    skip = (page - 1) * per_page
+
+    mongo_query = {}
+
+    if q:
+        mongo_query = {
+            "$or": [
+                {"employee_number": {"$regex": q, "$options": "i"}},
+                {"name": {"$regex": q, "$options": "i"}},
+                {"email": {"$regex": q, "$options": "i"}},
+                {"role": {"$regex": q, "$options": "i"}},
+                {"contact_number": {"$regex": q, "$options": "i"}},
+            ]
+        }
+
+    total = archive_collection.count_documents(mongo_query)
+    cursor = (
+        archive_collection.find(mongo_query)
+        .sort("deleted_at", -1)
+        .skip(skip)
+        .limit(per_page)
+    )
+
+    deleted_staff = []
+    for d in cursor:
+        d["_id"] = str(d["_id"])
+        deleted_staff.append(d)
+
+    total_pages = (total + per_page - 1) // per_page
+
+    return render_template(
+        "dict_staff_recycle_bin.html",
+        deleted_staff=deleted_staff,
+        page=page,
+        total_pages=total_pages,
+        total=total,
+        search_query=q,
+    )
+
+@auth_bp.route("/dict/staff/restore-selected", methods=["POST"])
+def restore_selected_staff():
+    if session.get("user_role") != "hsd":
+        return redirect(url_for("auth_bp.login"))
+
+    db_mongo = get_mongo_db()
+    archive_collection = db_mongo["staff_deleted"]
+    staff_collection = db_mongo["staff"]
+
+    selected_ids = request.form.getlist("selected_ids")
+    if not selected_ids:
+        flash("No employees selected for restore.", "error")
+        return redirect(url_for("auth_bp.dict_staff_recycle_bin"))
+
+    object_ids = []
+    for sid in selected_ids:
+        try:
+            object_ids.append(ObjectId(sid))
+        except Exception:
+            continue
+
+    if not object_ids:
+        flash("No valid archived employee IDs selected.", "error")
+        return redirect(url_for("auth_bp.dict_staff_recycle_bin"))
+
+    docs = list(archive_collection.find({"_id": {"$in": object_ids}}))
+    if not docs:
+        flash("Selected archived employees not found.", "error")
+        return redirect(url_for("auth_bp.dict_staff_recycle_bin"))
+
+    restored_count = 0
+
+    for doc in docs:
+        archive_id = doc["_id"]
+
+        doc.pop("deleted_at", None)
+        doc.pop("deleted_by", None)
+
+        existing = staff_collection.find_one({"_id": doc["_id"]})
+        if existing:
+            doc.pop("_id", None)
+
+        staff_collection.insert_one(doc)
+        archive_collection.delete_one({"_id": archive_id})
+        restored_count += 1
+
+    flash(f"Restored {restored_count} employees from archive.", "success")
+    return redirect(url_for("auth_bp.dict_staff_recycle_bin"))
