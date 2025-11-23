@@ -98,6 +98,17 @@
 
 </form>
 
+<form method="POST"
+      action="{{ url_for('auth_bp.delete_filtered_teachers') }}"
+      onsubmit="return confirm('Delete ALL teachers matching current search and date filters? This cannot be undone.');"
+      style="margin-top:6px;">
+    <input type="hidden" name="q" value="{{ search_query or '' }}">
+    <input type="hidden" name="from_date" value="{{ from_date or '' }}">
+    <input type="hidden" name="to_date" value="{{ to_date or '' }}">
+    <button type="submit" class="btn-upload" style="background:#e74c3c; color:#fff;">
+        Delete All Filtered Teachers
+    </button>
+</form>
 
 
 
@@ -106,46 +117,65 @@
 
 
 {% if teachers %}
-<div class="table-scroll">
-    <table>
-        <thead>
-            <tr>
-                <th>Reg. No</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Dept</th>
-                <th>Designation</th>
-                <th>Session</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody id="teacherTableBody">
-            {% for t in teachers %}
-            <tr>
-                <td>{{ t.registration_number }}</td>
-                <td>{{ t.name }}</td>
-                <td>{{ t.email }}</td>
-                <td>{{ t.department }}</td>
-                <td>{{ t.designation or '-' }}</td>
-                <td>{{ t.session_start_year }} - {{ t.session_end_year }}</td>
-                <td>
-                    <div style="display:flex; gap:6px;">
-                        <a href="{{ url_for('auth_bp.edit_teacher', teacher_id=t._id) }}">
-                            <button type="button" class="btn-delete" style="background:#3498db;">Edit</button>
-                        </a>
-                        <form method="POST"
-                              action="{{ url_for('auth_bp.delete_teacher', teacher_id=t._id) }}"
-                              onsubmit="return confirm('Are you sure you want to delete this teacher?');">
-                            <button type="submit" class="btn-delete">Delete</button>
-                        </form>
-                    </div>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
+<form method="POST"
+      action="{{ url_for('auth_bp.delete_selected_teachers') }}"
+      id="deleteSelectedTeachersForm">
+
+    <div class="table-scroll">
+        <table>
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="selectAllTeachers"></th>
+                    <th>Reg. No</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Dept</th>
+                    <th>Designation</th>
+                    <th>Session</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="teacherTableBody">
+                {% for t in teachers %}
+                <tr>
+                    <td>
+                        <input type="checkbox" name="selected_ids" value="{{ t._id }}">
+                    </td>
+                    <td>{{ t.registration_number }}</td>
+                    <td>{{ t.name }}</td>
+                    <td>{{ t.email }}</td>
+                    <td>{{ t.department }}</td>
+                    <td>{{ t.designation or '-' }}</td>
+                    <td>{{ t.session_start_year }} - {{ t.session_end_year }}</td>
+                    <td>
+                        <div style="display:flex; gap:6px;">
+                            <a href="{{ url_for('auth_bp.edit_teacher', teacher_id=t._id) }}">
+                                <button type="button" class="btn-delete" style="background:#3498db;">Edit</button>
+                            </a>
+                            <form method="POST"
+                                  action="{{ url_for('auth_bp.delete_teacher', teacher_id=t._id) }}"
+                                  onsubmit="return confirm('Are you sure you want to delete this teacher?');">
+                                <button type="submit" class="btn-delete">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-top:10px;">
+        <button type="submit"
+                class="btn-primary"
+                
+                onclick="return confirm('Delete selected teachers? This cannot be undone.');">
+            Delete Selected Teachers
+        </button>
+    </div>
+</form>
 {% else %}
+
 
 
 <p>No teachers found.</p>
@@ -186,7 +216,17 @@
             });
         });
     }
+
+    const selectAllTeachers = document.getElementById("selectAllTeachers");
+    const teacherCheckboxes = document.querySelectorAll('input[name="selected_ids"]');
+
+    if (selectAllTeachers) {
+        selectAllTeachers.addEventListener("change", function () {
+            teacherCheckboxes.forEach(cb => cb.checked = selectAllTeachers.checked);
+        });
+    }
 </script>
+
 
 </body>
 </html>

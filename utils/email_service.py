@@ -176,3 +176,71 @@ Regards,
 Unified Academic Platform (UAP)
 """
     return _send_email(subject, body, to_email)
+
+def send_account_deactivated_email(to_email: str, name: str, employee_id: str) -> bool:
+    """
+    Inform DICT employee that their account has been deactivated.
+    """
+    subject = "Your UAP DICT Account Has Been Deactivated"
+    body = f"""
+Dear {name},
+
+This is to inform you that your Unified Academic Platform (UAP) DICT account has been deactivated.
+
+Employee ID : {employee_id}
+Email       : {to_email}
+
+You will no longer be able to sign in to the DICT dashboard with this account.
+If you believe this was done in error, please contact the UAP administration or IT department.
+
+Regards,
+Unified Academic Platform (UAP) – DICT Department
+"""
+
+    return _send_email(subject, body, to_email)
+
+
+def send_account_reactivated_email(to_email: str, name: str, employee_id: str) -> bool:
+    """
+    Inform DICT employee that their account has been reactivated.
+    """
+    subject = "Your UAP DICT Account Has Been Reactivated"
+    body = f"""
+Dear {name},
+
+Good news! Your Unified Academic Platform (UAP) DICT account has been reactivated.
+
+Employee ID : {employee_id}
+Email       : {to_email}
+
+You can now log in again to the DICT dashboard using your existing credentials.
+If you face any issues signing in, please contact the UAP IT/DICT support team.
+
+Regards,
+Unified Academic Platform (UAP) – DICT Department
+"""
+
+    return _send_email(subject, body, to_email)
+
+
+def send_account_updated_email(to_email: str, name: str, employee_id: str) -> bool:
+    """
+    Inform DICT employee that their account details have been updated.
+    (Name, email, contact, department, address, or password.)
+    """
+    subject = "Your UAP DICT Account Details Have Been Updated"
+    body = f"""
+Dear {name},
+
+Your Unified Academic Platform (UAP) DICT account details have been updated.
+
+Employee ID : {employee_id}
+Email       : {to_email}
+
+If you did not request or expect these changes, please contact the UAP IT/DICT support team immediately.
+
+Regards,
+Unified Academic Platform (UAP) – DICT Department
+"""
+
+    return _send_email(subject, body, to_email)

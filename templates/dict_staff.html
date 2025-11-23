@@ -70,6 +70,18 @@
                class="btn-upload">
                 Download CSV
             </a>
+            <form method="POST"
+      action="{{ url_for('auth_bp.delete_filtered_staff') }}"
+      onsubmit="return confirm('Delete ALL employees matching current search and date filters? This cannot be undone.');"
+      style="margin-top:6px;">
+    <input type="hidden" name="q" value="{{ search_query or '' }}">
+    <input type="hidden" name="from_date" value="{{ from_date or '' }}">
+    <input type="hidden" name="to_date" value="{{ to_date or '' }}">
+    <button type="submit" class="btn-upload" style="background:#e74c3c; color:#fff;">
+        Delete All Filtered Employees
+    </button>
+</form>
+
 
         </div>
 
@@ -92,52 +104,72 @@
         </form>
     </div>
 
-    {% if staff_list %}
-<div class="table-scroll">
-    <table>
-        <thead>
-            <tr>
-                <th>Emp No</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Contact</th>
-                <th>Role</th>
-                <th>Experience (yrs)</th>
-                <th>DOJ</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
+{% if staff_list %}
+<form method="POST"
+      action="{{ url_for('auth_bp.delete_selected_staff') }}"
+      id="deleteSelectedStaffForm">
 
-        <tbody id="staffTableBody">
-            {% for s in staff_list %}
-            <tr>
-                <td>{{ s.employee_number }}</td>
-                <td>{{ s.name }}</td>
-                <td>{{ s.email }}</td>
-                <td>{{ s.contact_number or '-' }}</td>
-                <td>{{ s.role }}</td>
-                <td>{{ s.years_of_experience or 0 }}</td>
-                <td>{{ s.date_of_joining or '-' }}</td>
+    <div class="table-scroll">
+        <table>
+            <thead>
+                <tr>
+                    <th><input type="checkbox" id="selectAllStaff"></th>
+                    <th>Emp No</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Contact</th>
+                    <th>Role</th>
+                    <th>Experience (yrs)</th>
+                    <th>DOJ</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
 
-                <td>
-                    <div style="display:flex; gap:5px;">
-                        <a href="{{ url_for('auth_bp.edit_staff', staff_id=s._id) }}">
-                            <button type="button" class="btn-small" style="background:#3498db;">Edit</button>
-                        </a>
-                        <form method="POST"
-                              action="{{ url_for('auth_bp.delete_staff', staff_id=s._id) }}"
-                              onsubmit="return confirm('Are you sure you want to delete this employee?');">
-                            <button type="submit" class="btn-small" style="background:#e74c3c;">Delete</button>
-                        </form>
-                    </div>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
+            <tbody id="staffTableBody">
+                {% for s in staff_list %}
+                <tr>
+                    <td>
+                        <input type="checkbox" name="selected_ids" value="{{ s._id }}">
+                    </td>
+                    <td>{{ s.employee_number }}</td>
+                    <td>{{ s.name }}</td>
+                    <td>{{ s.email }}</td>
+                    <td>{{ s.contact_number or '-' }}</td>
+                    <td>{{ s.role }}</td>
+                    <td>{{ s.years_of_experience or 0 }}</td>
+                    <td>{{ s.date_of_joining or '-' }}</td>
 
-    </table>
-</div>
+                    <td>
+                        <div style="display:flex; gap:5px;">
+                            <a href="{{ url_for('auth_bp.edit_staff', staff_id=s._id) }}">
+                                <button type="button" class="btn-small" style="background:#3498db;">Edit</button>
+                            </a>
+                            <form method="POST"
+                                  action="{{ url_for('auth_bp.delete_staff', staff_id=s._id) }}"
+                                  onsubmit="return confirm('Are you sure you want to delete this employee?');">
+                                <button type="submit" class="btn-small" style="background:#e74c3c;">Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+    </div>
+
+    <div style="margin-top:10px;">
+        <button type="submit"
+                class="btn-primary"
+                
+                onclick="return confirm('Delete selected employees? This cannot be undone.');">
+            Delete Selected Employees
+        </button>
+    </div>
+
+</form>
 {% else %}
+
 
         <p style="margin-top:15px;">No employees found.</p>
     {% endif %}
@@ -176,7 +208,17 @@
             });
         });
     }
+
+    const selectAllStaff = document.getElementById("selectAllStaff");
+    const staffCheckboxes = document.querySelectorAll('input[name="selected_ids"]');
+
+    if (selectAllStaff) {
+        selectAllStaff.addEventListener("change", function () {
+            staffCheckboxes.forEach(cb => cb.checked = selectAllStaff.checked);
+        });
+    }
 </script>
+
 
 </body>
 </html>

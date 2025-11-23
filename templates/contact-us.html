@@ -7,6 +7,7 @@
 
 
   <style>
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -385,6 +386,68 @@
       color: #540863;
       text-decoration: underline;
     }
+/* =========================================================
+   FLASH MESSAGES (success, error, warning, info)
+   ========================================================= */
+
+.flash-message {
+    margin-bottom: 8px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    backdrop-filter: blur(4px);
+    transition: 0.3s ease;
+}
+
+/* SUCCESS */
+.success {
+    background: rgba(76, 175, 80, 0.18);
+    border: 1px solid rgba(76, 175, 80, 0.45);
+    color: #2e7d32;
+}
+
+/* ERROR */
+.error {
+    background: rgba(244, 67, 54, 0.18);
+    border: 1px solid rgba(244, 67, 54, 0.45);
+    color: #c62828;
+}
+
+/* WARNING */
+.warning {
+    background: rgba(255, 162, 57, 0.20);
+    border: 1px solid rgba(255, 162, 57, 0.50);
+    color: #8a4c15;
+}
+
+/* INFO */
+.info {
+    background: rgba(33, 150, 243, 0.20);
+    border: 1px solid rgba(33, 150, 243, 0.45);
+    color: #01579b;
+}
+
+/* ===== DARK MODE FIXES ===== */
+body.theme-dark .success {
+    background: rgba(76, 175, 80, 0.25);
+    color: #a5d6a7;
+}
+
+body.theme-dark .error {
+    background: rgba(244, 67, 54, 0.25);
+    color: #ef9a9a;
+}
+
+body.theme-dark .warning {
+    background: rgba(255, 162, 57, 0.22);
+    color: #ffcc80;
+}
+
+body.theme-dark .info {
+    background: rgba(33, 150, 243, 0.22);
+    color: #90caf9;
+}
 
     /* Success modal */
     .modal-backdrop {
@@ -529,8 +592,7 @@
     {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     {% for category, message in messages %}
-      <div style="margin-bottom:8px; padding:8px 10px; border-radius:8px; font-size:0.9rem;"
-           class="{{ category }}">
+      <div class="flash-message {{ category }}">
         {{ message }}
       </div>
     {% endfor %}

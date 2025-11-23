@@ -1765,3 +1765,299 @@ def dict_profile():
     db.session.commit()
     flash("Profile updated successfully.", "success")
     return redirect(url_for("auth_bp.dict_profile"))
+
+@auth_bp.route("/dict/contact-requests/delete-selected", methods=["POST"])
+def delete_selected_contact_requests():
+    if session.get("user_role") != "hsd":
+        return redirect(url_for("auth_bp.login"))
+
+    db_mongo = get_mongo_db()
+    contact_collection = db_mongo["contact_requests"]
+
+    selected_ids = request.form.getlist("selected_ids")
+
+    if not selected_ids:
+        flash("No contact requests selected for deletion.", "error")
+        return redirect(url_for("auth_bp.dict_contact_requests"))
+
+    object_ids = []
+    for cid in selected_ids:
+        try:
+            object_ids.append(ObjectId(cid))
+        except Exception:
+            continue
+
+    if not object_ids:
+        flash("No valid request IDs selected.", "error")
+        return redirect(url_for("auth_bp.dict_contact_requests"))
+
+    result = contact_collection.delete_many({"_id": {"$in": object_ids}})
+    flash(f"Deleted {result.deleted_count} contact requests.", "success")
+    return redirect(url_for("auth_bp.dict_contact_requests"))
+
+@auth_bp.route("/dict/contact-requests/delete-all", methods=["POST"])
+def delete_all_contact_requests():
+    if session.get("user_role") != "hsd":
+        return redirect(url_for("auth_bp.login"))
+
+    db_mongo = get_mongo_db()
+    contact_collection = db_mongo["contact_requests"]
+
+    count = contact_collection.count_documents({})
+    if count == 0:
+        flash("No contact requests to delete.", "error")
+        return redirect(url_for("auth_bp.dict_contact_requests"))
+
+    result = contact_collection.delete_many({})
+    flash(f"Deleted {result.deleted_count} contact requests.", "success")
+    return redirect(url_for("auth_bp.dict_contact_requests"))
+
+@auth_bp.route("/dict/students/delete-selected", methods=["POST"])
+def delete_selected_students():
+    if session.get("user_role") != "hsd":
+        return redirect(url_for("auth_bp.login"))
+
+    db_mongo = get_mongo_db()
+    students_collection = db_mongo["students"]
+
+    selected_ids = request.form.getlist("selected_ids")
+    if not selected_ids:
+        flash("No students selected for deletion.", "error")
+        return redirect(url_for("auth_bp.dict_students"))
+
+    object_ids = []
+    for sid in selected_ids:
+        try:
+            object_ids.append(ObjectId(sid))
+        except Exception:
+            continue
+
+    if not object_ids:
+        flash("No valid student IDs selected.", "error")
+        return redirect(url_for("auth_bp.dict_students"))
+
+    result = students_collection.delete_many({"_id": {"$in": object_ids}})
+    flash(f"Deleted {result.deleted_count} students.", "success")
+    return redirect(url_for("auth_bp.dict_students"))
+
+@auth_bp.route("/dict/students/delete-filtered", methods=["POST"])
+def delete_filtered_students():
+    """
+    Deletes ALL students matching the current filter (search + date range).
+    Use this if a wrong Excel upload was done for a specific department/date.
+    """
+    if session.get("user_role") != "hsd":
+        return redirect(url_for("auth_bp.login"))
+
+    db_mongo = get_mongo_db()
+    students_collection = db_mongo["students"]
+
+    q = request.form.get("q", "").strip()
+    from_date_str = request.form.get("from_date", "").strip()
+    to_date_str = request.form.get("to_date", "").strip()
+
+    filters = []
+
+    if q:
+        filters.append({
+            "$or": [
+                {"registration_number": {"$regex": q, "$options": "i"}},
+                {"name": {"$regex": q, "$options": "i"}},
+                {"department": {"$regex": q, "$options": "i"}},
+            ]
+        })
+
+    date_range = {}
+    if from_date_str:
+        try:
+            date_range["$gte"] = datetime.strptime(from_date_str, "%Y-%m-%d")
+        except ValueError:
+            pass
+    if to_date_str:
+        try:
+            dt = datetime.strptime(to_date_str, "%Y-%m-%d")
+            date_range["$lte"] = dt.replace(hour=23, minute=59, second=59)
+        except ValueError:
+            pass
+
+    if date_range:
+        filters.append({"created_at": date_range})
+
+    if filters:
+        query = {"$and": filters}
+    else:
+        flash("No filter applied. Please use search or date range before bulk delete.", "error")
+        return redirect(url_for("auth_bp.dict_students"))
+
+    count = students_collection.count_documents(query)
+    if count == 0:
+        flash("No students matched the filter to delete.", "error")
+        return redirect(url_for("auth_bp.dict_students"))
+
+    result = students_collection.delete_many(query)
+    flash(f"Deleted {result.deleted_count} students matching the filter.", "success")
+    return redirect(url_for("auth_bp.dict_students"))
+
+@auth_bp.route("/dict/teachers/delete-selected", methods=["POST"])
+def delete_selected_teachers():
+    if session.get("user_role") != "hsd":
+        return redirect(url_for("auth_bp.login"))
+
+    db_mongo = get_mongo_db()
+    teachers_collection = db_mongo["teachers"]
+
+    selected_ids = request.form.getlist("selected_ids")
+    if not selected_ids:
+        flash("No teachers selected for deletion.", "error")
+        return redirect(url_for("auth_bp.dict_teachers"))
+
+    object_ids = []
+    for tid in selected_ids:
+        try:
+            object_ids.append(ObjectId(tid))
+        except Exception:
+            continue
+
+    if not object_ids:
+        flash("No valid teacher IDs selected.", "error")
+        return redirect(url_for("auth_bp.dict_teachers"))
+
+    result = teachers_collection.delete_many({"_id": {"$in": object_ids}})
+    flash(f"Deleted {result.deleted_count} teachers.", "success")
+    return redirect(url_for("auth_bp.dict_teachers"))
+
+@auth_bp.route("/dict/teachers/delete-filtered", methods=["POST"])
+def delete_filtered_teachers():
+    if session.get("user_role") != "hsd":
+        return redirect(url_for("auth_bp.login"))
+
+    db_mongo = get_mongo_db()
+    teachers_collection = db_mongo["teachers"]
+
+    q = request.form.get("q", "").strip()
+    from_date_str = request.form.get("from_date", "").strip()
+    to_date_str = request.form.get("to_date", "").strip()
+
+    filters = []
+
+    if q:
+        filters.append({
+            "$or": [
+                {"registration_number": {"$regex": q, "$options": "i"}},
+                {"name": {"$regex": q, "$options": "i"}},
+                {"department": {"$regex": q, "$options": "i"}},
+            ]
+        })
+
+    date_range = {}
+    if from_date_str:
+        try:
+            date_range["$gte"] = datetime.strptime(from_date_str, "%Y-%m-%d")
+        except ValueError:
+            pass
+    if to_date_str:
+        try:
+            dt = datetime.strptime(to_date_str, "%Y-%m-%d")
+            date_range["$lte"] = dt.replace(hour=23, minute=59, second=59)
+        except ValueError:
+            pass
+
+    if date_range:
+        filters.append({"created_at": date_range})
+
+    if filters:
+        query = {"$and": filters}
+    else:
+        flash("No filter applied. Please use search or date range before bulk delete.", "error")
+        return redirect(url_for("auth_bp.dict_teachers"))
+
+    count = teachers_collection.count_documents(query)
+    if count == 0:
+        flash("No teachers matched the filter to delete.", "error")
+        return redirect(url_for("auth_bp.dict_teachers"))
+
+    result = teachers_collection.delete_many(query)
+    flash(f"Deleted {result.deleted_count} teachers matching the filter.", "success")
+    return redirect(url_for("auth_bp.dict_teachers"))
+
+@auth_bp.route("/dict/staff/delete-selected", methods=["POST"])
+def delete_selected_staff():
+    if session.get("user_role") != "hsd":
+        return redirect(url_for("auth_bp.login"))
+
+    db_mongo = get_mongo_db()
+    staff_collection = db_mongo["staff"]
+
+    selected_ids = request.form.getlist("selected_ids")
+    if not selected_ids:
+        flash("No employees selected for deletion.", "error")
+        return redirect(url_for("auth_bp.dict_staff"))
+
+    object_ids = []
+    for sid in selected_ids:
+        try:
+            object_ids.append(ObjectId(sid))
+        except Exception:
+            continue
+
+    if not object_ids:
+        flash("No valid employee IDs selected.", "error")
+        return redirect(url_for("auth_bp.dict_staff"))
+
+    result = staff_collection.delete_many({"_id": {"$in": object_ids}})
+    flash(f"Deleted {result.deleted_count} employees.", "success")
+    return redirect(url_for("auth_bp.dict_staff"))
+
+@auth_bp.route("/dict/staff/delete-filtered", methods=["POST"])
+def delete_filtered_staff():
+    if session.get("user_role") != "hsd":
+        return redirect(url_for("auth_bp.login"))
+
+    db_mongo = get_mongo_db()
+    staff_collection = db_mongo["staff"]
+
+    q = request.form.get("q", "").strip()
+    from_date_str = request.form.get("from_date", "").strip()
+    to_date_str = request.form.get("to_date", "").strip()
+
+    filters = []
+
+    if q:
+        filters.append({
+            "$or": [
+                {"employee_number": {"$regex": q, "$options": "i"}},
+                {"name": {"$regex": q, "$options": "i"}},
+                {"role": {"$regex": q, "$options": "i"}},
+            ]
+        })
+
+    date_range = {}
+    if from_date_str:
+        try:
+            date_range["$gte"] = datetime.strptime(from_date_str, "%Y-%m-%d")
+        except ValueError:
+            pass
+    if to_date_str:
+        try:
+            dt = datetime.strptime(to_date_str, "%Y-%m-%d")
+            date_range["$lte"] = dt.replace(hour=23, minute=59, second=59)
+        except ValueError:
+            pass
+
+    if date_range:
+        filters.append({"created_at": date_range})
+
+    if filters:
+        query = {"$and": filters}
+    else:
+        flash("No filter applied. Please use search or date range before bulk delete.", "error")
+        return redirect(url_for("auth_bp.dict_staff"))
+
+    count = staff_collection.count_documents(query)
+    if count == 0:
+        flash("No employees matched the filter to delete.", "error")
+        return redirect(url_for("auth_bp.dict_staff"))
+
+    result = staff_collection.delete_many(query)
+    flash(f"Deleted {result.deleted_count} employees matching the filter.", "success")
+    return redirect(url_for("auth_bp.dict_staff"))

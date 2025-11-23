@@ -2,19 +2,22 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Contact Us Requests – DICT</title>
+
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css') }}">
-<style>/* Wrapper to allow horizontal scroll if needed */
+
+<style>
+/* Wrapper to allow horizontal scroll if needed */
 .table-responsive {
   width: 100%;
   overflow-x: auto;
 }
 
-/* Optional: make contact table a bit wider on desktop */
+/* Make contact table a bit wider on desktop */
 .contact-table table {
   min-width: 640px;
 }
@@ -24,6 +27,19 @@
   margin-top: 10px;
   font-size: 14px;
   color: var(--text-muted);
+}
+
+/* Actions row (Delete Selected / Delete All) */
+.actions-row {
+  margin-top: 12px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.actions-row form {
+  display: inline-flex;
 }
 
 /* ========== MOBILE RESPONSIVE TABLE ========== */
@@ -77,113 +93,157 @@
   .contact-table .msg-cell {
     white-space: normal;
   }
+
+  .actions-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .actions-row form {
+    width: 100%;
+    justify-content: flex-start;
+  }
 }
 </style>
 </head>
 <body>
-  <div class="bg-image"></div>
-  <div class="bg-overlay"></div>
 
 <div class="container">
-    <a href="{{ url_for('auth_bp.dict_dashboard') }}" class="back-link">← Back to DICT Dashboard</a>
+  <a href="{{ url_for('auth_bp.dict_dashboard') }}" class="back-link">← Back to DICT Dashboard</a>
 
-    <h1>Contact Us Requests</h1>
-    <div class="subtitle">All messages submitted through the public Contact Us form.</div>
+  <h1>Contact Us Requests</h1>
+  <div class="subtitle">All messages submitted through the public Contact Us form.</div>
 
-    <!-- Flash messages (if you ever add actions later) -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="flash {{ category }}">{{ message }}</div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
-
-    <div class="summary">
-        Total requests: <strong>{{ total }}</strong>
-        {% if total_pages > 1 %}
-          • Page {{ page }} of {{ total_pages }}
-        {% endif %}
-    </div>
-
-{% if requests_list %}
-  <div class="table-responsive contact-table">
-    <table>
-      <thead>
-        <tr>
-          <th>From</th>
-          <th>Subject &amp; Message</th>
-          <th>Status</th>
-          <th>Received At</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for r in requests_list %}
-        <tr>
-          <td data-label="From">
-            <strong>{{ r.name }}</strong><br>
-            <span class="small-text">{{ r.email }}</span>
-          </td>
-
-          <td class="msg-cell" data-label="Subject &amp; Message">
-            {% if r.subject %}
-              <strong>{{ r.subject }}</strong><br>
-            {% endif %}
-            {{ r.message }}
-          </td>
-
-          <td data-label="Status">
-            {% set st = (r.status or 'new')|lower %}
-            {% if st == 'new' %}
-              <span class="status-badge status-new">New</span>
-            {% elif st == 'seen' %}
-              <span class="status-badge status-seen">Seen</span>
-            {% else %}
-              <span class="status-badge status-closed">{{ r.status|capitalize }}</span>
-            {% endif %}
-          </td>
-
-          <td class="small-text" data-label="Received At">
-            {% if r.created_at %}
-              {{ r.created_at.strftime("%d-%m-%Y %H:%M") if r.created_at.__class__.__name__ == 'datetime' else r.created_at }}
-            {% else %}
-              -
-            {% endif %}
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-{% else %}
-  <p class="empty-state">
-    No contact requests found yet.
-  </p>
-{% endif %}
-
-
-
-    {% if total_pages > 1 %}
-    <div class="pagination">
-        {% if page > 1 %}
-            <a href="{{ url_for('auth_bp.dict_contact_requests', page=page-1) }}">Prev</a>
-        {% endif %}
-
-        {% for p in range(1, total_pages + 1) %}
-            {% if p == page %}
-                <span class="current">{{ p }}</span>
-            {% else %}
-                <a href="{{ url_for('auth_bp.dict_contact_requests', page=p) }}">{{ p }}</a>
-            {% endif %}
-        {% endfor %}
-
-        {% if page < total_pages %}
-            <a href="{{ url_for('auth_bp.dict_contact_requests', page=page+1) }}">Next</a>
-        {% endif %}
-    </div>
+  <!-- Flash messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="flash {{ category }}">{{ message }}</div>
+      {% endfor %}
     {% endif %}
+  {% endwith %}
+
+  <div class="summary">
+    Total requests: <strong>{{ total }}</strong>
+    {% if total_pages > 1 %}
+      • Page {{ page }} of {{ total_pages }}
+    {% endif %}
+  </div>
+
+  {% if requests_list %}
+    <!-- Main form for DELETE SELECTED (checkboxes belong to this form) -->
+    <form method="POST"
+          action="{{ url_for('auth_bp.delete_selected_contact_requests') }}"
+          id="deleteSelectedForm">
+
+      <div class="table-responsive contact-table">
+        <table>
+          <thead>
+            <tr>
+              <th><input type="checkbox" id="selectAllRequests"></th>
+              <th>From</th>
+              <th>Subject &amp; Message</th>
+              <th>Status</th>
+              <th>Received At</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in requests_list %}
+            <tr>
+              <td data-label="Select">
+                <input type="checkbox" name="selected_ids" value="{{ r._id }}">
+              </td>
+              <td data-label="From">
+                <strong>{{ r.name }}</strong><br>
+                <span class="small-text">{{ r.email }}</span>
+              </td>
+              <td class="msg-cell" data-label="Subject &amp; Message">
+                {% if r.subject %}
+                  <strong>{{ r.subject }}</strong><br>
+                {% endif %}
+                {{ r.message }}
+              </td>
+              <td data-label="Status">
+                {% set st = (r.status or 'new')|lower %}
+                {% if st == 'new' %}
+                  <span class="status-badge status-new">New</span>
+                {% elif st == 'seen' %}
+                  <span class="status-badge status-seen">Seen</span>
+                {% else %}
+                  <span class="status-badge status-closed">{{ r.status|capitalize }}</span>
+                {% endif %}
+              </td>
+              <td class="small-text" data-label="Received At">
+                {% if r.created_at %}
+                  {{ r.created_at.strftime("%d-%m-%Y %H:%M") if r.created_at.__class__.__name__ == 'datetime' else r.created_at }}
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </form>
+
+    <!-- Action buttons row (no nested forms) -->
+    <div class="actions-row">
+      <!-- Delete selected button, linked to form above -->
+      <button type="submit"
+              form="deleteSelectedForm"
+              class="btn btn-delete-selected"
+              onclick="return confirm('Delete selected contact requests?');">
+        Delete Selected
+      </button>
+
+      <!-- Delete ALL requests: separate form -->
+      <form method="POST"
+            action="{{ url_for('auth_bp.delete_all_contact_requests') }}"
+            onsubmit="return confirm('Delete ALL contact requests? This cannot be undone.');">
+        <button type="submit" class="btn btn-delete-all">
+          Delete All Requests
+        </button>
+      </form>
+    </div>
+
+  {% else %}
+    <p class="empty-state">No contact requests found yet.</p>
+  {% endif %}
+
+  {% if total_pages > 1 %}
+    <div class="pagination">
+      {% if page > 1 %}
+        <a href="{{ url_for('auth_bp.dict_contact_requests', page=page-1) }}">Prev</a>
+      {% endif %}
+
+      {% for p in range(1, total_pages + 1) %}
+        {% if p == page %}
+          <span class="current">{{ p }}</span>
+        {% else %}
+          <a href="{{ url_for('auth_bp.dict_contact_requests', page=p) }}">{{ p }}</a>
+        {% endif %}
+      {% endfor %}
+
+      {% if page < total_pages %}
+        <a href="{{ url_for('auth_bp.dict_contact_requests', page=page+1) }}">Next</a>
+      {% endif %}
+    </div>
+  {% endif %}
 </div>
+
 <script src="{{ url_for('static', filename='js/theme.js') }}"></script>
+
+<script>
+  const selectAllReq = document.getElementById("selectAllRequests");
+  const reqCheckboxes = document.querySelectorAll('input[name="selected_ids"]');
+
+  if (selectAllReq) {
+    selectAllReq.addEventListener("change", function () {
+      reqCheckboxes.forEach(cb => cb.checked = selectAllReq.checked);
+    });
+  }
+</script>
 
 </body>
 </html>
